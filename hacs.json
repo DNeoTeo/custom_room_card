@@ -1,5 +1,7 @@
 {
-    "name": "Vertical Stack In Card",
-    "render_readme": true,
-    "filename": "vertical-stack-in-card.js"
+  "name": "button-card",
+  "content_in_root": false,
+  "render_readme": true,
+  "filename": "button-card.js",
+  "homeassistant": "2025.10.0"
 }

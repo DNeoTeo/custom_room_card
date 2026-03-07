@@ -1,84 +1,59 @@
-# Vertical Stack In Card
+# Button Card by [@RomRider](https://github.com/RomRider) <!-- omit in toc -->
 
-![Version](https://img.shields.io/github/v/release/ofekashery/vertical-stack-in-card)
-![Downloads](https://img.shields.io/github/downloads/ofekashery/vertical-stack-in-card/total)
-![Stars](https://img.shields.io/github/stars/ofekashery/vertical-stack-in-card)
-![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg)
+[![Stable][releases-shield]][releases] [![Beta][releases-dev-shield]][releases-dev] [![HACS Badge][hacs-badge]][hacs-link] ![Project Maintenance][maintenance-shield] <br/> ![Downloads][downloads] [![GitHub Activity][commits-shield]][commits] [![License][license-shield]](LICENSE.md) [![Discord][discord-shield]][discord] [![Community Forum][forum-shield]][forum]
 
-**Vertical Stack In Card** is a custom Lovelace card for Home Assistant, allowing you to group multiple cards into a single sleek card. It offers a clean, organized way to display multiple cards in your Home Assistant dashboard.
+[commits-shield]: https://img.shields.io/github/commit-activity/y/custom-cards/button-card.svg
+[commits]: https://github.com/custom-cards/button-card/commits/master
+[discord]: https://discord.gg/Qa5fW2R
+[discord-shield]: https://img.shields.io/discord/330944238910963714.svg
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
+[forum]: https://community.home-assistant.io/t/lovelace-button-card/65981
+[license-shield]: https://img.shields.io/github/license/custom-cards/button-card.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
+[releases-shield]: https://img.shields.io/github/release/custom-cards/button-card.svg
+[releases]: https://github.com/custom-cards/button-card/releases/latest
+[releases-dev-shield]: https://img.shields.io/github/package-json/v/custom-cards/button-card/dev?label=release%40dev
+[releases-dev]: https://github.com/custom-cards/button-card/releases
+[hacs-badge]: https://img.shields.io/badge/HACS-Default-41BDF5.svg
+[downloads]: https://img.shields.io/github/downloads/custom-cards/button-card/total
+[hacs-link]: https://hacs.xyz/
 
-![Showcase Card](https://user-images.githubusercontent.com/16443111/220773923-c28009d6-edfc-4ffd-9290-3e0c6e1acf73.png)
+# Useful links
 
-## Configuration Options
+- [Stable version documentation](https://custom-cards.github.io/button-card/)
+- [Dev version documentation](https://custom-cards.github.io/button-card/dev/)
+- [HA Discord][discord]
+- [button-card forum thread][forum]
 
-| Name         | Type    | Default | Description                                       |
-| ------------ | ------- | ------- | ------------------------------------------------- |
-| `type`       | string  | N/A     | Must be `custom:vertical-stack-in-card`.          |
-| `cards`      | list    | N/A     | List of cards to include.                         |
-| `title`      | string  | None    | Optional. Title displayed at the top of the card. |
-| `horizontal` | boolean | false   | Optional. Whatever stack cards horizontally.      |
-| `styles`     | object  | None    | Optional. Add custom CSS for advanced styling.    |
+# What is `custom:button-card`?
 
-## Installation
+This is a lovelace custom card called button-card for your entities with a **LOT** of configuration options.
 
-### Via HACS (Home Assistant Community Store)
+![all](examples/all.gif)
 
-1. Open HACS in Home Assistant.
-2. Search for "Vertical Stack In Card."
-3. Install and follow the setup instructions.
-
-### Manual Installation
-
-Download the [`vertical-stack-in-card.js`](https://raw.githubusercontent.com/ofekashery/vertical-stack-in-card/master/vertical-stack-in-card.js) into your `<config directory>/www` directory.
-
-```bash
-wget https://raw.githubusercontent.com/ofekashery/vertical-stack-in-card/master/vertical-stack-in-card.js
-mv vertical-stack-in-card.js /config/www/
-```
-
-#### Add resource reference
-
-If you configure Lovelace via YAML, add a reference to `vertical-stack-in-card.js` inside your `configuration.yaml`:
-
-```yaml
-resources:
-  - url: /local/vertical-stack-in-card.js?v=1.0.1
-    type: js
-```
-
-Alternatively, if you prefer the graphical editor, use the menu to add the resource.
-
-1. Make sure, **advanced mode** is enabled in your user profile (click on your user name to get there).
-
-2. Navigate to the **Configuration** -> **Lovelace Dashboards** -> **Resources**.
-
-3. Click on **Add resource**, and fill out the form as follows:
-
-   - **Url:** `/local/vertical-stack-in-card.js?v=1.0.1`
-   - **Resource type:** `JavaScript Module`
-
-4. Finish by clicking **Create** and refresh your browser.
-
-## Usage
-
-Add the card to your Lovelace UI configuration:
-
-```yaml
-type: 'custom:vertical-stack-in-card'
-title: My Card
-cards:
-  - type: glance
-    entities:
-      - sensor.temperature_sensor
-      - sensor.humidity_sensor
-      - sensor.motion_sensor
-  - type: entities
-    entities:
-      - switch.livingroom_tv
-      - switch.livingroom_ac
-      - light.ambient_lights
-```
-
-## Acknowledgements
-
-Thanks to [@ciotlosm](https://github.com/ciotlosm) and [@thomasloven](https://github.com/thomasloven) for their inspiration and contributions in building the foundation of this project.
+- works with any entity
+- 6 available actions on **tap** and/or **hold** and/or **double click**: `none`, `toggle`, `more-info`, `navigate`, `url`, `assist` and `call-service`
+- **icon tap action**: Separate action when clicking the icon specifically which takes precedence over main card actions.
+- **momentary actions** for the card and/or icon: `press_action` and `release_action` (if used, replaces default actions)
+- 3 button-card custom actions: `javascript`, `multi-actions`, `toast`
+- state display (optional)
+- custom color (optional), or based on light rgb value/temperature
+- custom state definition with customizable color, icon and style
+- custom size of the icon, width and height
+- aspect ratio support
+- Support for javascript templates
+- custom icon
+- custom css style
+- multiple layout support and custom layout support
+- units for sensors can be redefined or hidden
+- 2 color types
+  - `icon` : apply color settings to the icon only
+  - `card` : apply color settings to the card only
+- automatic font color if `color_type` is set to `card`
+- blank card and label card (for organization)
+- Native blink animation support
+- icon rotation animation support
+- confirmation popup for sensitive items or locking mecanism
+- password or PIN protection for actions
+- haptic support for the [IOS companion App](https://companion.home-assistant.io/docs/integrations/haptics)
+- support for [HACS](https://github.com/hacs/integration)
