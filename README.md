@@ -1,157 +1,84 @@
-# Custom Room Card
+# Vertical Stack In Card
 
-[![HACS Custom Badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/yourusername/custom-room-card.svg)](https://github.com/yourusername/custom-room-card/releases)
+![Version](https://img.shields.io/github/v/release/ofekashery/vertical-stack-in-card)
+![Downloads](https://img.shields.io/github/downloads/ofekashery/vertical-stack-in-card/total)
+![Stars](https://img.shields.io/github/stars/ofekashery/vertical-stack-in-card)
+![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg)
 
-🎨 Une custom card Home Assistant moderne pour créer des layouts adaptatifs avec des boutons d'entités positionnés librement et des backgrounds personnalisables.
+**Vertical Stack In Card** is a custom Lovelace card for Home Assistant, allowing you to group multiple cards into a single sleek card. It offers a clean, organized way to display multiple cards in your Home Assistant dashboard.
 
-## ✨ Caractéristiques
+![Showcase Card](https://user-images.githubusercontent.com/16443111/220773923-c28009d6-edfc-4ffd-9290-3e0c6e1acf73.png)
 
-- 📍 **Positionnement libre** des entités sur la carte
-- 🖼️ **Background personnalisable** (image ou couleur)
-- 🎯 **Layouts adaptatifs** avec grille de positionnement
-- 🔘 **Boutons interactifs** pour toutes les entités
-- 🎨 **Thème CSS personnalisable**
-- ⚡ **Léger et performant** (Lit framework)
-- 🚀 **Installation facile via HACS**
+## Configuration Options
 
-## 🖼️ Aperçu
+| Name         | Type    | Default | Description                                       |
+| ------------ | ------- | ------- | ------------------------------------------------- |
+| `type`       | string  | N/A     | Must be `custom:vertical-stack-in-card`.          |
+| `cards`      | list    | N/A     | List of cards to include.                         |
+| `title`      | string  | None    | Optional. Title displayed at the top of the card. |
+| `horizontal` | boolean | false   | Optional. Whatever stack cards horizontally.      |
+| `styles`     | object  | None    | Optional. Add custom CSS for advanced styling.    |
 
-```
-┌─────────────────────────────┐
-│  Ma Pièce                   │
-├─────────────────────────────┤
-│                             │
-│    💡 Lumière          Rideau│
-│                             │
-│      Thermo            📺    │
-│                             │
-└─────────────────────────────┘
-```
+## Installation
 
-## 📦 Installation Rapide
+### Via HACS (Home Assistant Community Store)
 
-### Via HACS (Recommandé)
+1. Open HACS in Home Assistant.
+2. Search for "Vertical Stack In Card."
+3. Install and follow the setup instructions.
 
-1. Allez dans **HACS** → **Lovelace**
-2. Cliquez sur **⋮** → **Custom repositories**
-3. Ajoutez: `https://github.com/yourusername/custom-room-card`
-4. Sélectionnez **Lovelace** et créez
-5. Installez **Custom Room Card**
-6. Redémarrez Home Assistant
+### Manual Installation
 
-### Installation Manuelle
+Download the [`vertical-stack-in-card.js`](https://raw.githubusercontent.com/ofekashery/vertical-stack-in-card/master/vertical-stack-in-card.js) into your `<config directory>/www` directory.
 
 ```bash
-# Téléchargez le fichier dist/custom-room-card.js
-# Placez-le dans /config/www/
-
-# Dans configuration.yaml
-lovelace:
-  resources:
-    - url: /local/custom-room-card.js
-      type: module
+wget https://raw.githubusercontent.com/ofekashery/vertical-stack-in-card/master/vertical-stack-in-card.js
+mv vertical-stack-in-card.js /config/www/
 ```
 
-## 🎯 Configuration Basique
+#### Add resource reference
+
+If you configure Lovelace via YAML, add a reference to `vertical-stack-in-card.js` inside your `configuration.yaml`:
 
 ```yaml
-type: custom:custom-room-card
-title: "Salon"
-background_image: /local/salon.jpg
-height: "400px"
-entities:
-  - entity: light.salon_principal
-    label: "Lumière"
-    icon: mdi:lightbulb
-    top: "25%"
-    left: "30%"
-  - entity: climate.salon
-    label: "Thermo"
-    icon: mdi:thermometer
-    bottom: "20%"
-    right: "25%"
+resources:
+  - url: /local/vertical-stack-in-card.js?v=1.0.1
+    type: js
 ```
 
-## 📖 Documentation Complète
+Alternatively, if you prefer the graphical editor, use the menu to add the resource.
 
-- 👥 **[Documentation Utilisateur](README_USER.md)** - Installation, configuration, exemples
-- 👨‍💻 **[Documentation Développeur](DEVELOPER.md)** - Architecture, extension du code
-- 🤝 **[Contribution Guide](CONTRIBUTING.md)** - Comment contribuer
+1. Make sure, **advanced mode** is enabled in your user profile (click on your user name to get there).
 
-## 💡 Exemples
+2. Navigate to the **Configuration** -> **Lovelace Dashboards** -> **Resources**.
 
-### Chambre Simple
+3. Click on **Add resource**, and fill out the form as follows:
+
+   - **Url:** `/local/vertical-stack-in-card.js?v=1.0.1`
+   - **Resource type:** `JavaScript Module`
+
+4. Finish by clicking **Create** and refresh your browser.
+
+## Usage
+
+Add the card to your Lovelace UI configuration:
 
 ```yaml
-type: custom:custom-room-card
-title: "Chambre"
-background_color: "#f0f0f0"
-height: "350px"
-entities:
-  - entity: light.bedroom
-    label: "Lumière"
-    icon: mdi:lightbulb
-    top: "50%"
-    left: "50%"
-    size: "70px"
+type: 'custom:vertical-stack-in-card'
+title: My Card
+cards:
+  - type: glance
+    entities:
+      - sensor.temperature_sensor
+      - sensor.humidity_sensor
+      - sensor.motion_sensor
+  - type: entities
+    entities:
+      - switch.livingroom_tv
+      - switch.livingroom_ac
+      - light.ambient_lights
 ```
 
-### Avec Grille de Développement
+## Acknowledgements
 
-```yaml
-type: custom:custom-room-card
-show_grid: true
-grid_size: 50
-background_color: "rgba(200,200,200,0.2)"
-height: "500px"
-```
-
-## 🛠️ Développement Local
-
-```bash
-# Cloner et installer
-git clone https://github.com/yourusername/custom-room-card.git
-cd custom-room-card
-npm install
-
-# Mode développement (watch)
-npm run dev
-
-# Build production
-npm run build
-
-# Lint & format
-npm run lint
-npm run format
-```
-
-## 🐛 Support
-
-- 📋 Issues: [GitHub Issues](https://github.com/yourusername/custom-room-card/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/custom-room-card/discussions)
-- 🏠 Home Assistant: [Community Forums](https://community.home-assistant.io/)
-
-## 📄 License
-
-Apache License 2.0 - Voir [LICENSE](LICENSE) pour les détails complets.
-
-## 🙏 Remerciements
-
-Inspiré par:
-- [button-card](https://github.com/custom-cards/button-card)
-- [mushroom-cards](https://github.com/piitaya/mushroom-cards)
-- [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card)
-
-## 📈 Versions
-
-- **v1.0.0** - Version initiale (7 Mars 2026)
-  - Positionnement libre des entités
-  - Backgrounds personnalisables
-  - Actions au clic configurables
-  - Grille de développement
-
----
-
-Made with ❤️ for Home Assistant
+Thanks to [@ciotlosm](https://github.com/ciotlosm) and [@thomasloven](https://github.com/thomasloven) for their inspiration and contributions in building the foundation of this project.

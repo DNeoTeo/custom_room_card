@@ -1,9 +1,5 @@
 {
-  "name": "Custom-Room-Card",
-  "content_in_root": true,
-  "filename": "custom-room-card.js",
-  "documentation": "https://github.com/DNeoTeo/custom-room-card",
-  "homeassistant": "2024.1.0",
-  "render_readme": true,
-  "category": "lovelace"
+    "name": "Vertical Stack In Card",
+    "render_readme": true,
+    "filename": "vertical-stack-in-card.js"
 }
