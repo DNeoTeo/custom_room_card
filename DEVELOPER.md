@@ -29,6 +29,12 @@ custom-room-card/
 - Un instance Home Assistant locale pour tester
 - VS Code (recommandé)
 
+### ⚠️ Utilisateurs WSL/Windows
+
+Si vous utilisez **WSL2 ou PowerShell**, consultez [WSL_WINDOWS.md](WSL_WINDOWS.md) pour les solutions aux problèmes de chemins.
+
+**Recommandation:** Utilisez WSL (terminal Linux natif) plutôt que PowerShell pour éviter les problèmes.
+
 ### Installation
 
 ```bash
