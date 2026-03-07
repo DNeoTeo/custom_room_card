@@ -1,0 +1,34 @@
+# Exemple 3: Mode Développement avec Grille
+# Utilisez cet exemple pour positionner vos entités précisément
+
+type: custom:custom-room-card
+title: "Mode Développement - Grille de Positionnement"
+show_grid: true
+grid_size: 50
+background_color: "rgba(200, 200, 200, 0.15)"
+height: "500px"
+border_radius: "12px"
+entities:
+  - entity: light.livingroom
+    label: "Test 1 (25%, 25%)"
+    top: "25%"
+    left: "25%"
+    
+  - entity: light.bedroom
+    label: "Test 2 (50%, 50%)"
+    top: "50%"
+    left: "50%"
+    
+  - entity: light.kitchen
+    label: "Test 3 (75%, 75%)"
+    top: "75%"
+    left: "75%"
+    
+  - entity: light.bathroom
+    label: "Test 4 (25%, 75%)"
+    bottom: "25%"
+    right: "25%"
+
+# La grille affiche les lignes à 50px d'intervalle
+# Cela aide à positionner précisément vos entités
+# Une fois satisfait, retournez show_grid: false

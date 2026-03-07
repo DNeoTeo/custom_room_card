@@ -1,0 +1,9 @@
+{
+  "domain": "custom_room_card",
+  "codeowners": ["@yourusername"],
+  "config_flow": false,
+  "documentation": "https://github.com/yourusername/custom-room-card",
+  "iot_class": "local_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}

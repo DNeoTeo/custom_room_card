@@ -1,0 +1,43 @@
+{
+  "name": "custom-room-card",
+  "version": "1.0.0",
+  "description": "Custom Home Assistant card for adaptive layouts with positioned entities and custom backgrounds",
+  "author": "Your Name",
+  "license": "Apache-2.0",
+  "main": "dist/custom-room-card.js",
+  "module": "dist/custom-room-card.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "custom-card",
+    "hacs",
+    "adaptive-layout",
+    "room-card"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-terser": "^1.0.0",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "rollup": "^4.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "home-assistant-js-websocket": "^8.0.0",
+    "lit": "^3.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/custom-room-card"
+  }
+}

@@ -1,0 +1,39 @@
+# Exemple 2: Avec Image de Fond
+# Chambre avec ambiance
+
+type: custom:custom-room-card
+title: "Chambre - Mode Veille"
+background_image: /local/images/bedroom.jpg
+background_size: cover
+background_position: center
+background_opacity: 0.85
+height: "450px"
+border_radius: "12px"
+entities:
+  - entity: light.bedroom_main
+    label: "Plafond"
+    icon: mdi:ceiling-light
+    top: "25%"
+    left: "50%"
+    size: "70px"
+    
+  - entity: light.bedroom_bedside_left
+    label: "Gauche"
+    icon: mdi:wall-sconce
+    bottom: "20%"
+    left: "15%"
+    size: "60px"
+    
+  - entity: light.bedroom_bedside_right
+    label: "Droite"
+    icon: mdi:wall-sconce
+    bottom: "20%"
+    right: "15%"
+    size: "60px"
+    
+  - entity: switch.bedroom_fan
+    label: "Ventilo"
+    icon: mdi:fan
+    bottom: "20%"
+    left: "50%"
+    size: "60px"

@@ -1,0 +1,113 @@
+# Exemple 5: Avec Actions Avancées
+# Différents types d'actions et interactions
+
+type: custom:custom-room-card
+title: "Actions Avancées"
+background_color: "#f0f0f0"
+height: "450px"
+entities:
+  # Action: Toggle (défaut)
+  - entity: light.exemple_toggle
+    label: "Toggle"
+    icon: mdi:lightbulb
+    top: "15%"
+    left: "15%"
+    size: "70px"
+    tap_action:
+      action: toggle
+      
+  # Action: Turn On avec paramètres
+  - entity: light.exemple_color
+    label: "Rouge"
+    icon: mdi:lightbulb-color
+    top: "15%"
+    left: "35%"
+    size: "70px"
+    tap_action:
+      action: turn_on
+      service: light.turn_on
+      data:
+        entity_id: light.exemple_color
+        brightness: 255
+        rgb_color: [255, 0, 0]
+        
+  # Action: Turn Off
+  - entity: light.exemple_off
+    label: "Éteindre"
+    icon: mdi:lightbulb-off
+    top: "15%"
+    left: "55%"
+    size: "70px"
+    tap_action:
+      action: turn_off
+      
+  # Action: Service Complexe
+  - entity: automation.scene_cinema
+    label: "Cinéma"
+    icon: mdi:filmstrip
+    top: "15%"
+    left: "75%"
+    size: "70px"
+    tap_action:
+      action: call_service
+      service: scene.turn_on
+      data:
+        entity_id: scene.cinema
+        
+  # Action: Augmenter Brightness
+  - entity: light.dimmable
+    label: "Augmenter"
+    icon: mdi:plus
+    bottom: "15%"
+    left: "25%"
+    size: "60px"
+    tap_action:
+      action: call_service
+      service: light.turn_on
+      data:
+        entity_id: light.dimmable
+        brightness: 255
+        
+  # Action: Diminuer Brightness
+  - entity: light.dimmable
+    label: "Diminuer"
+    icon: mdi:minus
+    bottom: "15%"
+    left: "40%"
+    size: "60px"
+    tap_action:
+      action: call_service
+      service: light.turn_on
+      data:
+        entity_id: light.dimmable
+        brightness: 100
+        
+  # Action: Thermostat
+  - entity: climate.salon
+    label: "+2°"
+    icon: mdi:plus-circle-outline
+    bottom: "15%"
+    left: "60%"
+    size: "60px"
+    tap_action:
+      action: call_service
+      service: climate.set_temperature
+      data:
+        entity_id: climate.salon
+        temperature: 23
+        
+  # Action: Multiple Entités
+  - entity: automation.lock_all
+    label: "Verrouiller"
+    icon: mdi:lock
+    bottom: "15%"
+    right: "25%"
+    size: "70px"
+    tap_action:
+      action: call_service
+      service: lock.lock
+      data:
+        entity_id: 
+          - lock.front_door
+          - lock.back_door
+          - lock.garage
