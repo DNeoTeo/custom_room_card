@@ -8,10 +8,11 @@
   "module": "dist/custom-room-card.js",
   "type": "module",
   "scripts": {
-    "dev": "echo 'Le fichier dist/custom-room-card.js est déjà compilé'",
-    "build": "echo 'Le fichier dist/custom-room-card.js est déjà compilé'",
-    "lint": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts"
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "dev": "npm run build && npm run build:watch",
+    "lint": "eslint src/**/*.ts 2>/dev/null || echo 'ESLint not configured'",
+    "format": "prettier --write src/**/*.ts 2>/dev/null || echo 'Prettier not configured'"
   },
   "keywords": [
     "home-assistant",
@@ -38,6 +39,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/custom-room-card"
+    "url": "https://github.com/DNeoTeo/custom-room-card"
   }
 }

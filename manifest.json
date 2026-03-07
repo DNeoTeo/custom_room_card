@@ -1,8 +1,8 @@
 {
   "domain": "custom_room_card",
-  "codeowners": ["@yourusername"],
+  "codeowners": ["@DNeoTeo"],
   "config_flow": false,
-  "documentation": "https://github.com/yourusername/custom-room-card",
+  "documentation": "https://github.com/DNeoTeo/custom-room-card",
   "iot_class": "local_polling",
   "requirements": [],
   "version": "1.0.0"

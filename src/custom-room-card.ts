@@ -1,6 +1,11 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { HomeAssistant, LovelaceCardConfig } from 'home-assistant-js-websocket';
+
+// Types Home Assistant
+interface HomeAssistant {
+  callService: (domain: string, service: string, data?: any) => Promise<any>;
+  states?: Record<string, any>;
+}
 
 interface ButtonEntity {
   entity: string;
@@ -18,7 +23,8 @@ interface ButtonEntity {
   };
 }
 
-interface CustomRoomCardConfig extends LovelaceCardConfig {
+interface CustomRoomCardConfig {
+  type: string;
   title?: string;
   background_image?: string;
   background_size?: string;
