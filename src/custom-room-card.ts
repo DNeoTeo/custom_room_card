@@ -295,6 +295,14 @@ export class CustomRoomCard extends LitElement {
   }
 }
 
+// Déclarer la custom card pour Home Assistant Lovelace
+(window as any).customCards = (window as any).customCards || [];
+(window as any).customCards.push({
+  type: 'custom-room-card',
+  name: 'Custom Room Card',
+  description: 'Adaptive layouts with freely positioned entities and custom backgrounds',
+});
+
 declare global {
   interface HTMLElementTagNameMap {
     'custom-room-card': CustomRoomCard;
