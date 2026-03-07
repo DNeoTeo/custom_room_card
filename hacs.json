@@ -1,9 +1,10 @@
-hacs:
-  name: Custom Room Card
-  content_in_root: false
-  filename: custom-room-card.js
-  documentation: https://github.com/yourusername/custom-room-card
-  homeassistant: 2024.1.0
-  render_readme: true
-  requirements:
-    - requests
+{
+  "name": "Custom Room Card",
+  "content_in_root": false,
+  "filename": "custom-room-card.js",
+  "documentation": "https://github.com/DNeoTeo/custom-room-card",
+  "homeassistant": "2024.1.0",
+  "render_readme": true,
+  "category": "lovelace",
+  "country": "FR"
+}
