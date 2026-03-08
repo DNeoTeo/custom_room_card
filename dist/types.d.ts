@@ -111,6 +111,13 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
     aspect_ratio?: string;
     /** Card height in px (overrides aspect_ratio if set) */
     card_height?: number;
+    /**
+     * Reference / design width in px (default: 600).
+     * Used to compute the responsive scale factor.
+     * All pixel-based sizes (entity buttons, nested cards, icons, labels)
+     * are scaled proportionally: scale = actualCardWidth / design_width.
+     */
+    design_width?: number;
     /** Entity buttons */
     entities?: EntityButtonConfig[];
     /** Nested Lovelace cards */

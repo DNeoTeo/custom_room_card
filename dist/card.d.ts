@@ -11,8 +11,14 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     hass: HomeAssistant;
     private _config;
     private _nestedCards;
+    /** Responsive scale factor: actualWidth / designWidth */
+    private _cardScale;
+    private _resizeObserver?;
+    private _observedContainer?;
     private _holdTimer;
     private _holdTriggered;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
     setConfig(config: CustomRoomCardConfig): void;
     getCardSize(): number;
     /** Expose the editor element. */
@@ -30,6 +36,16 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     private _onPointerUp;
     private _cancelHold;
     private _addRipple;
+    /**
+     * Sets up the ResizeObserver that tracks the card container width
+     * and recomputes the scale factor whenever the card is resized.
+     */
+    private _setupResizeObserver;
+    /**
+     * Scales a CSS size value (px) proportionally to the card scale.
+     * Percentage and 'auto' values are returned unchanged.
+     */
+    private _scaleCssSize;
     private _aspectRatioPadding;
 }
 declare global {

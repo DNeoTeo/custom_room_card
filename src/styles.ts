@@ -65,7 +65,7 @@ export const cardStyles = css`
     top: 12px;
     left: 16px;
     z-index: 2;
-    font-size: 1.2em;
+    font-size: calc(1.2em * var(--card-scale, 1));
     font-weight: 600;
     color: var(--primary-text-color);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
@@ -81,11 +81,11 @@ export const cardStyles = css`
     justify-content: center;
     cursor: pointer;
     border: none;
-    border-radius: 12px;
+    border-radius: calc(12px * var(--card-scale, 1));
     background: var(--btn-bg);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    padding: 6px;
+    padding: calc(6px * var(--card-scale, 1));
     transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
     z-index: 3;
     user-select: none;
@@ -118,14 +118,14 @@ export const cardStyles = css`
   }
 
   .entity-btn ha-icon {
-    --mdc-icon-size: 24px;
+    --mdc-icon-size: calc(24px * var(--card-scale, 1));
     color: var(--btn-icon-color);
     transition: color 0.2s ease;
   }
 
   .entity-btn .btn-label {
     margin-top: 2px;
-    font-size: var(--btn-label-size);
+    font-size: calc(var(--btn-label-size) * var(--card-scale, 1));
     color: var(--btn-label-color);
     text-align: center;
     line-height: 1.2;
@@ -136,7 +136,7 @@ export const cardStyles = css`
   }
 
   .entity-btn .btn-state {
-    font-size: 9px;
+    font-size: calc(9px * var(--card-scale, 1));
     color: var(--btn-label-color);
     opacity: 0.8;
     text-align: center;
@@ -183,13 +183,11 @@ export const cardStyles = css`
   /* ── Responsive ──────────────────────────────────────── */
   @media (max-width: 600px) {
     .entity-btn {
-      border-radius: 10px;
+      border-radius: calc(10px * var(--card-scale, 1));
     }
-    .entity-btn ha-icon {
-      --mdc-icon-size: 20px;
-    }
-    .entity-btn .btn-label {
-      font-size: 9px;
+    .room-title {
+      top: 8px;
+      left: 10px;
     }
   }
 `;
@@ -466,5 +464,31 @@ export const editorStyles = css`
 
   .checkbox-row input[type="checkbox"] {
     accent-color: var(--primary-color);
+  }
+
+  /* ── Responsive info box ──────────────────────────────── */
+  .responsive-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: rgba(var(--rgb-primary-color, 33, 150, 243), 0.08);
+    border: 1px solid rgba(var(--rgb-primary-color, 33, 150, 243), 0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--secondary-text-color);
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  .responsive-info ha-icon {
+    --mdc-icon-size: 18px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .responsive-info strong {
+    color: var(--primary-text-color);
   }
 `;

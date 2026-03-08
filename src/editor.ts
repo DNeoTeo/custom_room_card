@@ -93,6 +93,27 @@ export class CustomRoomCardEditor extends LitElement {
             }}
           ></ha-textfield>
         </div>
+        <div class="form-row">
+          <ha-textfield
+            label="Design Width (px)"
+            type="number"
+            min="100"
+            max="2000"
+            .value=${this._config.design_width?.toString() ?? "600"}
+            @input=${(ev: InputEvent) => {
+              const v = (ev.target as HTMLInputElement).value;
+              this._updateConfig("design_width", v ? Number(v) : 600);
+            }}
+          ></ha-textfield>
+        </div>
+        <div class="responsive-info">
+          <ha-icon icon="mdi:responsive"></ha-icon>
+          <span>
+            Responsive scaling active: entity buttons and nested cards scale
+            proportionally to the card width relative to the design width
+            (<strong>${this._config.design_width ?? 600}px</strong>).
+          </span>
+        </div>
       </div>
     `;
   }

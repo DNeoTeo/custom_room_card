@@ -61,11 +61,28 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
   @state() private _config!: CustomRoomCardConfig;
   @state() private _nestedCards: Map<number, LovelaceCard> = new Map();
 
+  /** Responsive scale factor: actualWidth / designWidth */
+  @state() private _cardScale = 1;
+  private _resizeObserver?: ResizeObserver;
+  private _observedContainer?: Element;
+
   // Hold timer for long-press
   private _holdTimer: ReturnType<typeof setTimeout> | undefined;
   private _holdTriggered = false;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this._setupResizeObserver();
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = undefined;
+    this._observedContainer = undefined;
+  }
 
   public setConfig(config: CustomRoomCardConfig): void {
     if (!config) throw new Error("Invalid configuration");
@@ -119,6 +136,16 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
 
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
+
+    // Attach ResizeObserver to the container once it appears in the DOM
+    if (!this._observedContainer) {
+      const container = this.shadowRoot?.querySelector(".room-container");
+      if (container && this._resizeObserver) {
+        this._resizeObserver.observe(container);
+        this._observedContainer = container;
+      }
+    }
+
     // Create nested cards on first render or config change
     if (changedProps.has("_config") && this._config?.nested_cards?.length) {
       this._createNestedCards();
@@ -144,7 +171,9 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       "fixed-height": !!this._config.card_height,
     };
 
-    const containerStyles: Record<string, string> = {};
+    const containerStyles: Record<string, string> = {
+      "--card-scale": String(this._cardScale),
+    };
     if (this._config.card_height) {
       containerStyles["--card-height"] = `${this._config.card_height}px`;
     } else if (this._config.aspect_ratio) {
@@ -211,11 +240,12 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       unavailable,
     };
 
+    const scale = this._cardScale;
     const btnStyles: Record<string, string> = {
       left: `${cfg.left}%`,
       top: `${cfg.top}%`,
-      width: `${cfg.width ?? 60}px`,
-      height: `${cfg.height ?? 60}px`,
+      width: `${(cfg.width ?? 60) * scale}px`,
+      height: `${(cfg.height ?? 60) * scale}px`,
       transform: "translate(-50%, -50%)",
       ...((cfg.styles as Record<string, string>) ?? {}),
     };
@@ -249,8 +279,8 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     const wrapperStyles: Record<string, string> = {
       left: `${ncCfg.left}%`,
       top: `${ncCfg.top}%`,
-      width: ncCfg.width ?? "200px",
-      height: ncCfg.height ?? "auto",
+      width: this._scaleCssSize(ncCfg.width, "200px"),
+      height: this._scaleCssSize(ncCfg.height, "auto"),
       transform: "translate(-50%, -50%)",
       "z-index": String(ncCfg.z_index ?? 2),
       ...(ncCfg.border_radius ? { "border-radius": ncCfg.border_radius, overflow: "hidden" } : {}),
@@ -351,6 +381,47 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     ripple.style.top = `${ev.clientY - rect.top - size / 2}px`;
     btn.appendChild(ripple);
     ripple.addEventListener("animationend", () => ripple.remove());
+  }
+
+  // ── Responsive scaling ─────────────────────────────────────────────────────
+
+  /**
+   * Sets up the ResizeObserver that tracks the card container width
+   * and recomputes the scale factor whenever the card is resized.
+   */
+  private _setupResizeObserver(): void {
+    if (this._resizeObserver) return;
+    this._resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        if (width <= 0) continue;
+        const designWidth = this._config?.design_width ?? 600;
+        // Clamp scale between 0.3× and 2× to avoid extreme sizes
+        const newScale = Math.max(0.3, Math.min(2, width / designWidth));
+        if (Math.abs(newScale - this._cardScale) > 0.005) {
+          this._cardScale = newScale;
+        }
+      }
+    });
+  }
+
+  /**
+   * Scales a CSS size value (px) proportionally to the card scale.
+   * Percentage and 'auto' values are returned unchanged.
+   */
+  private _scaleCssSize(value: string | undefined, fallback: string): string {
+    const v = value || fallback;
+    if (v === "auto" || v === "none" || v === "inherit") return v;
+    if (v.endsWith("%")) return v;
+    const pxMatch = v.match(/^([\d.]+)\s*px$/i);
+    if (pxMatch) {
+      return `${parseFloat(pxMatch[1]) * this._cardScale}px`;
+    }
+    // Bare number → treat as px
+    if (/^[\d.]+$/.test(v)) {
+      return `${parseFloat(v) * this._cardScale}px`;
+    }
+    return v;
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
