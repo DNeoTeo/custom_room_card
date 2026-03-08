@@ -35,11 +35,11 @@ A custom [Home Assistant](https://www.home-assistant.io/) Lovelace card that let
 
 ### Manual
 
-1. Download `custom-room-card.js` from the [latest release][release-url]
-2. Copy to `config/www/custom-room-card/custom-room-card.js`
+1. Download `custom_room_card.js` from the [latest release][release-url]
+2. Copy to `config/www/custom-room-card/custom_room_card.js`
 3. Add the resource in HA:
    - **Settings** → **Dashboards** → **Resources** → **Add Resource**
-   - URL: `/local/custom-room-card/custom-room-card.js`
+   - URL: `/local/custom-room-card/custom_room_card.js`
    - Type: **JavaScript Module**
 4. Refresh your browser
 
@@ -210,7 +210,7 @@ npm run watch          # Dev build with hot reload
 ```
 custom-room-card/
 ├── src/
-│   ├── custom-room-card.ts   # Entry point
+│   ├── custom_room_card.ts    # Entry point
 │   ├── card.ts                # Main card LitElement
 │   ├── editor.ts              # Visual editor LitElement
 │   ├── helpers.ts             # Utility functions
@@ -229,7 +229,7 @@ custom-room-card/
 
 1. Push your code to a **public** GitHub repository
 2. Create a GitHub **release** with a tag (e.g. `v1.0.0`)
-3. Attach `dist/custom-room-card.js` to the release as an asset
+3. Attach `dist/custom_room_card.js` to the release as an asset
 4. Ensure [hacs.json](hacs.json) is at the repo root
 5. Submit to the [HACS default repository](https://hacs.xyz/docs/publish/start) or use as a custom repo
 
