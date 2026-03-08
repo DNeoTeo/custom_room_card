@@ -77,11 +77,22 @@ export interface NestedCardConfig {
     left: number;
     /** Vertical position in % (0-100) */
     top: number;
-    /** Width in % or px (default: 'auto') */
+    /** Width – CSS value: px, %, or 'auto' (default: '200px') */
     width?: string;
-    /** Height in % or px (default: 'auto') */
+    /** Height – CSS value: px, %, or 'auto' (default: 'auto') */
     height?: string;
+    /** Optional label shown in editor preview */
+    label?: string;
+    /** z-index layer order (default: 2) */
+    z_index?: number;
+    /** CSS border-radius override */
+    border_radius?: string;
+    /** Hide the card's own ha-card shadow/border */
+    hide_card_border?: boolean;
+    /** Custom CSS styles applied to the wrapper */
+    styles?: Record<string, string>;
 }
+export declare const DEFAULT_NESTED_CARD: Partial<NestedCardConfig>;
 export interface CustomRoomCardConfig extends LovelaceCardConfig {
     type: string;
     /** Card title */

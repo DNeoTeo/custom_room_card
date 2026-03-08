@@ -105,6 +105,39 @@ nested_cards:
     top: 85
     width: "120px"
     height: "60px"
+    label: Temp Sensor
+  - card:
+      type: gauge
+      entity: sensor.bedroom_humidity
+      name: Humidity
+    left: 85
+    top: 85
+    width: "140px"
+    height: "140px"
+    z_index: 3
+  - card:
+      type: thermostat
+      entity: climate.bedroom_ac
+    left: 50
+    top: 60
+    width: "180px"
+    height: "auto"
+    hide_card_border: true
+  - card:
+      type: markdown
+      content: "**Welcome home!**"
+    left: 50
+    top: 8
+    width: "200px"
+    border_radius: "20px"
+  - card:
+      type: custom:button-card
+      entity: light.bedroom
+      name: Main Light
+    left: 30
+    top: 50
+    width: "100px"
+    height: "100px"
 ```
 
 ### Card options
@@ -156,13 +189,100 @@ tap_action:
 
 ### Nested card options
 
-| Option   | Type   | Default    | Description                                  |
-| -------- | ------ | ---------- | -------------------------------------------- |
-| `card`   | object | *required* | Standard Lovelace card configuration         |
-| `left`   | number | *required* | Horizontal position in % (0–100)             |
-| `top`    | number | *required* | Vertical position in % (0–100)               |
-| `width`  | string | `auto`     | Width (CSS value: `120px`, `30%`…)           |
-| `height` | string | `auto`     | Height (CSS value: `60px`, `20%`…)           |
+You can embed **any Lovelace card** (built-in or custom) and position it freely.
+
+| Option             | Type    | Default    | Description                                              |
+| ------------------ | ------- | ---------- | -------------------------------------------------------- |
+| `card`             | object  | *required* | Standard Lovelace card configuration (with `type`)       |
+| `left`             | number  | `50`       | Horizontal position in % (0–100)                         |
+| `top`              | number  | `50`       | Vertical position in % (0–100)                           |
+| `width`            | string  | `200px`    | Width – CSS value: `120px`, `30%`, `auto`                |
+| `height`           | string  | `auto`     | Height – CSS value: `60px`, `20%`, `auto`                |
+| `label`            | string  | —          | Label shown in the editor preview only                   |
+| `z_index`          | number  | `2`        | Layer order (higher = on top)                            |
+| `border_radius`    | string  | —          | CSS border-radius override                               |
+| `hide_card_border` | boolean | `false`    | Hide card shadow/border (transparent background)         |
+| `styles`           | object  | —          | Custom CSS key/value pairs for the wrapper               |
+
+#### Nested card examples
+
+**Simple sensor card:**
+```yaml
+nested_cards:
+  - card:
+      type: sensor
+      entity: sensor.temperature
+    left: 20
+    top: 80
+    width: "130px"
+```
+
+**Thermostat with no border:**
+```yaml
+nested_cards:
+  - card:
+      type: thermostat
+      entity: climate.living_room
+    left: 50
+    top: 50
+    width: "200px"
+    height: "200px"
+    hide_card_border: true
+```
+
+**Custom button-card:**
+```yaml
+nested_cards:
+  - card:
+      type: custom:button-card
+      entity: light.kitchen
+      name: Kitchen
+      show_state: true
+    left: 70
+    top: 30
+    width: "120px"
+    height: "80px"
+    border_radius: "16px"
+```
+
+**Markdown overlay:**
+```yaml
+nested_cards:
+  - card:
+      type: markdown
+      content: "### Room Status\n**All systems normal**"
+    left: 50
+    top: 10
+    width: "250px"
+    z_index: 5
+    hide_card_border: true
+```
+
+**Multiple cards overlayed:**
+```yaml
+nested_cards:
+  - card:
+      type: gauge
+      entity: sensor.humidity
+    left: 15
+    top: 80
+    width: "120px"
+    height: "120px"
+  - card:
+      type: gauge
+      entity: sensor.temperature
+    left: 85
+    top: 80
+    width: "120px"
+    height: "120px"
+  - card:
+      type: weather-forecast
+      entity: weather.home
+    left: 50
+    top: 50
+    width: "300px"
+    z_index: 3
+```
 
 ---
 

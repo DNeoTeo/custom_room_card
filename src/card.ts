@@ -16,6 +16,8 @@ import {
   HomeAssistant,
   LovelaceCard,
   LovelaceCardConfig,
+  NestedCardConfig,
+  DEFAULT_NESTED_CARD,
   CARD_NAME,
   CARD_DESCRIPTION,
   CARD_VERSION,
@@ -242,17 +244,22 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
   // ── Nested cards ───────────────────────────────────────────────────────────
 
   private _renderNestedCard(index: number): TemplateResult {
-    const ncCfg = this._config.nested_cards![index];
+    const raw = this._config.nested_cards![index];
+    const ncCfg: NestedCardConfig = { ...DEFAULT_NESTED_CARD, ...raw } as NestedCardConfig;
     const wrapperStyles: Record<string, string> = {
       left: `${ncCfg.left}%`,
       top: `${ncCfg.top}%`,
-      width: ncCfg.width ?? "auto",
+      width: ncCfg.width ?? "200px",
       height: ncCfg.height ?? "auto",
       transform: "translate(-50%, -50%)",
+      "z-index": String(ncCfg.z_index ?? 2),
+      ...(ncCfg.border_radius ? { "border-radius": ncCfg.border_radius, overflow: "hidden" } : {}),
+      ...((ncCfg.styles as Record<string, string>) ?? {}),
     };
 
     return html`
-      <div class="nested-card-wrapper" style=${styleMap(wrapperStyles)}
+      <div class="nested-card-wrapper ${ncCfg.hide_card_border ? "no-border" : ""}"
+           style=${styleMap(wrapperStyles)}
            id="nested-${index}">
       </div>
     `;

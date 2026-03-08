@@ -12,8 +12,11 @@ import { styleMap } from "lit/directives/style-map.js";
 import {
   CustomRoomCardConfig,
   EntityButtonConfig,
+  NestedCardConfig,
   HomeAssistant,
   DEFAULT_ENTITY_BUTTON,
+  DEFAULT_NESTED_CARD,
+  LovelaceCardConfig,
 } from "./types";
 import { editorStyles } from "./styles";
 import { deepClone } from "./helpers";
@@ -48,6 +51,8 @@ export class CustomRoomCardEditor extends LitElement {
         ${this._renderBackgroundSection()}
         <!-- Entity buttons -->
         ${this._renderEntitiesSection()}
+        <!-- Nested cards -->
+        ${this._renderNestedCardsSection()}
         <!-- Position preview -->
         ${this._renderPreview()}
       </div>
@@ -244,11 +249,184 @@ export class CustomRoomCardEditor extends LitElement {
     `;
   }
 
+  // ── Nested cards section ────────────────────────────────────────────────────
+
+  /** Known built-in HA card types for the dropdown */
+  // Available card types for reference:
+  // button, entities, entity, gauge, glance, history-graph, light, map,
+  // markdown, media-control, picture, sensor, thermostat, weather-forecast,
+  // tile, mushroom-entity-card, custom:button-card, etc.
+
+  private _renderNestedCardsSection(): TemplateResult {
+    const nestedCards = this._config.nested_cards ?? [];
+
+    return html`
+      <div class="editor-section">
+        <div class="section-title">
+          <ha-icon icon="mdi:cards-outline"></ha-icon>
+          Nested Cards
+        </div>
+
+        <div class="nested-cards-list">
+          ${nestedCards.map((nc, i) => this._renderNestedCardRow(nc, i))}
+        </div>
+
+        <button class="add-btn" @click=${this._addNestedCard} title="Add nested card">
+          <ha-icon icon="mdi:plus"></ha-icon>
+        </button>
+      </div>
+    `;
+  }
+
+  private _renderNestedCardRow(
+    nc: NestedCardConfig,
+    index: number
+  ): TemplateResult {
+    const cardType = nc.card?.type ?? "";
+    const yamlConfig = this._cardConfigToYaml(nc.card);
+
+    return html`
+      <div class="nested-card-row">
+        <div class="nested-card-header">
+          <ha-icon icon="mdi:card-outline"></ha-icon>
+          <span class="nested-card-title">
+            ${nc.label || cardType || `Card #${index + 1}`}
+          </span>
+          <button
+            class="remove-btn"
+            @click=${() => this._removeNestedCard(index)}
+            title="Remove card"
+          >
+            <ha-icon icon="mdi:close"></ha-icon>
+          </button>
+        </div>
+
+        <div class="form-row">
+          <ha-textfield
+            label="Label (editor only)"
+            .value=${nc.label ?? ""}
+            @input=${(ev: InputEvent) =>
+              this._updateNestedCard(index, "label", (ev.target as HTMLInputElement).value || undefined)}
+          ></ha-textfield>
+        </div>
+
+        <!-- Card type selector -->
+        <div class="form-row">
+          <ha-textfield
+            label="Card Type (e.g. button, sensor, custom:button-card)"
+            .value=${cardType}
+            @input=${(ev: InputEvent) => {
+              const newType = (ev.target as HTMLInputElement).value;
+              const newCard = { ...nc.card, type: newType };
+              this._updateNestedCard(index, "card", newCard);
+            }}
+          ></ha-textfield>
+        </div>
+
+        <!-- Quick type chips -->
+        <div class="type-chips">
+          ${["button", "sensor", "gauge", "tile", "entity", "thermostat", "weather-forecast", "markdown"].map(
+            (t) => html`
+              <button
+                class="type-chip ${cardType === t ? "active" : ""}"
+                @click=${() => {
+                  const newCard = { ...nc.card, type: t };
+                  this._updateNestedCard(index, "card", newCard);
+                }}
+              >${t}</button>
+            `
+          )}
+        </div>
+
+        <!-- Card YAML configuration -->
+        <div class="form-row">
+          <textarea
+            class="yaml-editor"
+            rows="5"
+            placeholder="Card YAML config (without 'type:')&#10;e.g.:&#10;entity: sensor.temperature&#10;name: My Sensor"
+            .value=${yamlConfig}
+            @change=${(ev: Event) => {
+              const yaml = (ev.target as HTMLTextAreaElement).value;
+              const parsed = this._yamlToCardConfig(yaml, cardType);
+              this._updateNestedCard(index, "card", parsed);
+            }}
+          ></textarea>
+        </div>
+
+        <!-- Position & Size -->
+        <div class="form-row">
+          <ha-textfield
+            label="Left %"
+            type="number"
+            min="0"
+            max="100"
+            .value=${nc.left?.toString() ?? "50"}
+            @input=${(ev: InputEvent) =>
+              this._updateNestedCard(index, "left", Number((ev.target as HTMLInputElement).value))}
+          ></ha-textfield>
+          <ha-textfield
+            label="Top %"
+            type="number"
+            min="0"
+            max="100"
+            .value=${nc.top?.toString() ?? "50"}
+            @input=${(ev: InputEvent) =>
+              this._updateNestedCard(index, "top", Number((ev.target as HTMLInputElement).value))}
+          ></ha-textfield>
+          <ha-textfield
+            label="Width (px, %, auto)"
+            .value=${nc.width ?? "200px"}
+            @input=${(ev: InputEvent) =>
+              this._updateNestedCard(index, "width", (ev.target as HTMLInputElement).value || "200px")}
+          ></ha-textfield>
+          <ha-textfield
+            label="Height (px, %, auto)"
+            .value=${nc.height ?? "auto"}
+            @input=${(ev: InputEvent) =>
+              this._updateNestedCard(index, "height", (ev.target as HTMLInputElement).value || "auto")}
+          ></ha-textfield>
+        </div>
+
+        <!-- Advanced options (collapsed by default) -->
+        <details class="advanced-options">
+          <summary>Advanced options</summary>
+          <div class="form-row">
+            <ha-textfield
+              label="Z-Index"
+              type="number"
+              .value=${nc.z_index?.toString() ?? "2"}
+              @input=${(ev: InputEvent) =>
+                this._updateNestedCard(index, "z_index", Number((ev.target as HTMLInputElement).value) || 2)}
+            ></ha-textfield>
+            <ha-textfield
+              label="Border Radius (CSS)"
+              .value=${nc.border_radius ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateNestedCard(index, "border_radius", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+          </div>
+          <div class="form-row">
+            <label class="checkbox-row">
+              <input
+                type="checkbox"
+                .checked=${nc.hide_card_border ?? false}
+                @change=${(ev: Event) =>
+                  this._updateNestedCard(index, "hide_card_border", (ev.target as HTMLInputElement).checked)}
+              />
+              Hide card border/shadow (transparent background)
+            </label>
+          </div>
+        </details>
+      </div>
+    `;
+  }
+
   // ── Position preview ───────────────────────────────────────────────────────
 
   private _renderPreview(): TemplateResult {
     const entities = this._config.entities ?? [];
-    if (entities.length === 0) return html`${nothing}`;
+    const nestedCards = this._config.nested_cards ?? [];
+    if (entities.length === 0 && nestedCards.length === 0) return html`${nothing}`;
 
     const bgStyle: Record<string, string> = {};
     if (this._config.background_image) {
@@ -272,19 +450,37 @@ export class CustomRoomCardEditor extends LitElement {
         </div>
         <div class="preview-box" style=${styleMap(bgStyle)}
              @click=${(ev: MouseEvent) => this._onPreviewClick(ev)}>
+          <!-- Entity dots (blue) -->
           ${entities.map(
             (e, i) => html`
               <div
-                class="preview-dot"
+                class="preview-dot entity-dot"
                 style=${styleMap({
                   left: `${e.left ?? 50}%`,
                   top: `${e.top ?? 50}%`,
                 })}
                 draggable="true"
-                @dragstart=${(ev: DragEvent) => this._onDotDragStart(ev, i)}
-                @dragend=${(ev: DragEvent) => this._onDotDragEnd(ev, i)}
+                @dragstart=${(ev: DragEvent) => this._onDotDragStart(ev, i, "entity")}
+                @dragend=${(ev: DragEvent) => this._onDotDragEnd(ev, i, "entity")}
               >
-                <span class="dot-label">${e.label || e.entity || `#${i + 1}`}</span>
+                <span class="dot-label">${e.label || e.entity || `E#${i + 1}`}</span>
+              </div>
+            `
+          )}
+          <!-- Nested card dots (orange rectangles) -->
+          ${nestedCards.map(
+            (nc, i) => html`
+              <div
+                class="preview-dot card-dot"
+                style=${styleMap({
+                  left: `${nc.left ?? 50}%`,
+                  top: `${nc.top ?? 50}%`,
+                })}
+                draggable="true"
+                @dragstart=${(ev: DragEvent) => this._onDotDragStart(ev, i, "card")}
+                @dragend=${(ev: DragEvent) => this._onDotDragEnd(ev, i, "card")}
+              >
+                <span class="dot-label">${nc.label || nc.card?.type || `C#${i + 1}`}</span>
               </div>
             `
           )}
@@ -322,6 +518,125 @@ export class CustomRoomCardEditor extends LitElement {
     this._updateConfig("entities", entities);
   }
 
+  // ── Nested card handlers ───────────────────────────────────────────────────
+
+  private _addNestedCard(): void {
+    const nestedCards = [...(this._config.nested_cards ?? [])];
+    nestedCards.push({
+      card: { type: "button" },
+      left: DEFAULT_NESTED_CARD.left!,
+      top: DEFAULT_NESTED_CARD.top!,
+      width: DEFAULT_NESTED_CARD.width,
+      height: DEFAULT_NESTED_CARD.height,
+    });
+    this._updateConfig("nested_cards", nestedCards);
+  }
+
+  private _removeNestedCard(index: number): void {
+    const nestedCards = [...(this._config.nested_cards ?? [])];
+    nestedCards.splice(index, 1);
+    this._updateConfig("nested_cards", nestedCards);
+  }
+
+  private _updateNestedCard(
+    index: number,
+    key: keyof NestedCardConfig,
+    value: unknown
+  ): void {
+    const nestedCards = deepClone(this._config.nested_cards ?? []);
+    if (!nestedCards[index]) return;
+    (nestedCards[index] as any)[key] = value;
+    this._updateConfig("nested_cards", nestedCards);
+  }
+
+  // ── YAML helpers ───────────────────────────────────────────────────────────
+
+  /**
+   * Converts a card config object (minus `type`) to a simple YAML-like string.
+   * Only handles flat key:value and simple nested objects.
+   */
+  private _cardConfigToYaml(cardConfig: LovelaceCardConfig | undefined): string {
+    if (!cardConfig) return "";
+    const lines: string[] = [];
+    for (const [key, value] of Object.entries(cardConfig)) {
+      if (key === "type") continue;
+      if (value === undefined || value === null) continue;
+      if (typeof value === "object" && !Array.isArray(value)) {
+        lines.push(`${key}:`);
+        for (const [k2, v2] of Object.entries(value as Record<string, unknown>)) {
+          lines.push(`  ${k2}: ${JSON.stringify(v2)}`);
+        }
+      } else if (Array.isArray(value)) {
+        lines.push(`${key}: ${JSON.stringify(value)}`);
+      } else {
+        lines.push(`${key}: ${value}`);
+      }
+    }
+    return lines.join("\n");
+  }
+
+  /**
+   * Parses a simple YAML-like string back into a card config object.
+   * Handles flat key: value pairs. For complex configs, falls back to JSON.
+   */
+  private _yamlToCardConfig(yaml: string, cardType: string): LovelaceCardConfig {
+    const config: Record<string, unknown> = { type: cardType };
+    const lines = yaml.split("\n");
+    let currentObj: Record<string, unknown> | null = null;
+    let currentKey = "";
+
+    for (const line of lines) {
+      const trimmed = line.trimEnd();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+
+      // Indented line = sub-property
+      if (trimmed.startsWith("  ") && currentObj !== null) {
+        const match = trimmed.trim().match(/^([^:]+):\s*(.*)$/);
+        if (match) {
+          currentObj[match[1].trim()] = this._parseYamlValue(match[2].trim());
+        }
+        continue;
+      }
+
+      // Top-level line
+      const match = trimmed.match(/^([^:]+):\s*(.*)$/);
+      if (match) {
+        const key = match[1].trim();
+        const val = match[2].trim();
+        if (key === "type") continue; // Ignore type in YAML
+
+        if (val === "" || val === undefined) {
+          // Start of nested object
+          currentKey = key;
+          currentObj = {};
+          config[currentKey] = currentObj;
+        } else {
+          currentObj = null;
+          config[key] = this._parseYamlValue(val);
+        }
+      }
+    }
+
+    return config as LovelaceCardConfig;
+  }
+
+  private _parseYamlValue(val: string): unknown {
+    if (val === "true") return true;
+    if (val === "false") return false;
+    if (val === "null" || val === "~") return null;
+    // Try JSON (for arrays/objects)
+    if (val.startsWith("[") || val.startsWith("{")) {
+      try { return JSON.parse(val); } catch { /* fallback */ }
+    }
+    // Number
+    if (/^-?\d+(\.\d+)?$/.test(val)) return Number(val);
+    // Strip quotes
+    if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
+      return val.slice(1, -1);
+    }
+    return val;
+  }
+
   private _updateConfig(key: string, value: unknown): void {
     this._config = { ...this._config, [key]: value };
     this._fireConfigChanged();
@@ -339,17 +654,18 @@ export class CustomRoomCardEditor extends LitElement {
   // ── Drag & drop in preview ─────────────────────────────────────────────────
 
   private _dragIndex = -1;
+  private _dragItemType: "entity" | "card" = "entity";
 
-  private _onDotDragStart(ev: DragEvent, index: number): void {
+  private _onDotDragStart(ev: DragEvent, index: number, type: "entity" | "card"): void {
     this._dragIndex = index;
+    this._dragItemType = type;
     if (ev.dataTransfer) {
       ev.dataTransfer.effectAllowed = "move";
-      // Required for Firefox
-      ev.dataTransfer.setData("text/plain", String(index));
+      ev.dataTransfer.setData("text/plain", `${type}:${index}`);
     }
   }
 
-  private _onDotDragEnd(ev: DragEvent, index: number): void {
+  private _onDotDragEnd(ev: DragEvent, index: number, type: "entity" | "card"): void {
     const box = this.shadowRoot?.querySelector(".preview-box") as HTMLElement;
     if (!box) return;
     const rect = box.getBoundingClientRect();
@@ -359,14 +675,19 @@ export class CustomRoomCardEditor extends LitElement {
     const top = Math.round(
       Math.min(100, Math.max(0, ((ev.clientY - rect.top) / rect.height) * 100))
     );
-    this._updateEntity(index, "left", left);
-    this._updateEntity(index, "top", top);
+    if (type === "entity") {
+      this._updateEntity(index, "left", left);
+      this._updateEntity(index, "top", top);
+    } else {
+      this._updateNestedCard(index, "left", left);
+      this._updateNestedCard(index, "top", top);
+    }
     this._dragIndex = -1;
   }
 
   private _onPreviewClick(_ev: MouseEvent): void {
     // Only act if no drag occurred
-    if (this._dragIndex >= 0) return;
+    if (this._dragIndex >= 0 && this._dragItemType) return;
   }
 }
 

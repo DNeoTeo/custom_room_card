@@ -148,11 +148,19 @@ export const cardStyles = css`
     position: absolute;
     z-index: 2;
     overflow: hidden;
+    border-radius: var(--ha-card-border-radius, 12px);
   }
 
   .nested-card-wrapper > * {
     width: 100%;
     height: 100%;
+  }
+
+  .nested-card-wrapper.no-border > ha-card,
+  .nested-card-wrapper.no-border > * {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
   }
 
   /* ── Ripple effect ───────────────────────────────────── */
@@ -325,6 +333,17 @@ export const editorStyles = css`
     cursor: grab;
   }
 
+  .preview-dot.entity-dot {
+    background: var(--primary-color, #2196f3);
+  }
+
+  .preview-dot.card-dot {
+    background: var(--warning-color, #ff9800);
+    border-radius: 3px;
+    width: 20px;
+    height: 14px;
+  }
+
   .preview-dot .dot-label {
     position: absolute;
     top: 18px;
@@ -336,5 +355,116 @@ export const editorStyles = css`
     background: rgba(255, 255, 255, 0.85);
     padding: 1px 4px;
     border-radius: 3px;
+  }
+
+  /* ── Nested card editor rows ───────────────────────── */
+  .nested-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nested-card-row {
+    background: var(--secondary-background-color, #f5f5f5);
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid var(--warning-color, #ff9800);
+  }
+
+  .nested-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .nested-card-header ha-icon {
+    --mdc-icon-size: 18px;
+    color: var(--warning-color, #ff9800);
+  }
+
+  .nested-card-title {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.95em;
+    color: var(--primary-text-color);
+  }
+
+  .type-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .type-chip {
+    cursor: pointer;
+    border: 1px solid var(--divider-color, #ddd);
+    border-radius: 16px;
+    padding: 3px 10px;
+    font-size: 11px;
+    background: var(--card-background-color, white);
+    color: var(--primary-text-color);
+    transition: all 0.15s;
+  }
+
+  .type-chip:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .type-chip.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+
+  .yaml-editor {
+    width: 100%;
+    min-height: 80px;
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    font-size: 12px;
+    padding: 8px;
+    border: 1px solid var(--divider-color, #ddd);
+    border-radius: 6px;
+    background: var(--card-background-color, white);
+    color: var(--primary-text-color);
+    resize: vertical;
+    box-sizing: border-box;
+    line-height: 1.5;
+  }
+
+  .yaml-editor:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .advanced-options {
+    margin-top: 8px;
+  }
+
+  .advanced-options summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--secondary-text-color);
+    user-select: none;
+    margin-bottom: 8px;
+  }
+
+  .advanced-options summary:hover {
+    color: var(--primary-text-color);
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--primary-text-color);
+    cursor: pointer;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    accent-color: var(--primary-color);
   }
 `;
