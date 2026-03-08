@@ -208,7 +208,15 @@ export class CustomRoomCardEditor extends LitElement {
             this._updateEntity(index, "entity", ev.detail.value)}
         ></ha-entity-picker>
 
-        <div class="entity-position">
+        <button
+          class="remove-btn"
+          @click=${() => this._removeEntity(index)}
+          title="Remove"
+        >
+          <ha-icon icon="mdi:close"></ha-icon>
+        </button>
+
+        <div class="entity-extra-row">
           <ha-textfield
             label="Left %"
             type="number"
@@ -229,43 +237,39 @@ export class CustomRoomCardEditor extends LitElement {
           ></ha-textfield>
         </div>
 
-        <ha-textfield
-          label="Icon"
-          .value=${entity.icon ?? ""}
-          @input=${(ev: InputEvent) =>
-            this._updateEntity(index, "icon", (ev.target as HTMLInputElement).value || undefined)}
-        ></ha-textfield>
+        <div class="entity-extra-row">
+          <ha-textfield
+            label="Icon"
+            .value=${entity.icon ?? ""}
+            @input=${(ev: InputEvent) =>
+              this._updateEntity(index, "icon", (ev.target as HTMLInputElement).value || undefined)}
+          ></ha-textfield>
 
-        <ha-textfield
-          label="Label"
-          .value=${entity.label ?? ""}
-          @input=${(ev: InputEvent) =>
-            this._updateEntity(index, "label", (ev.target as HTMLInputElement).value || undefined)}
-        ></ha-textfield>
+          <ha-textfield
+            label="Label"
+            .value=${entity.label ?? ""}
+            @input=${(ev: InputEvent) =>
+              this._updateEntity(index, "label", (ev.target as HTMLInputElement).value || undefined)}
+          ></ha-textfield>
+        </div>
 
-        <ha-textfield
-          label="W (px)"
-          type="number"
-          .value=${entity.width?.toString() ?? "60"}
-          @input=${(ev: InputEvent) =>
-            this._updateEntity(index, "width", Number((ev.target as HTMLInputElement).value) || 60)}
-        ></ha-textfield>
+        <div class="entity-extra-row">
+          <ha-textfield
+            label="W (px)"
+            type="number"
+            .value=${entity.width?.toString() ?? "60"}
+            @input=${(ev: InputEvent) =>
+              this._updateEntity(index, "width", Number((ev.target as HTMLInputElement).value) || 60)}
+          ></ha-textfield>
 
-        <ha-textfield
-          label="H (px)"
-          type="number"
-          .value=${entity.height?.toString() ?? "60"}
-          @input=${(ev: InputEvent) =>
-            this._updateEntity(index, "height", Number((ev.target as HTMLInputElement).value) || 60)}
-        ></ha-textfield>
-
-        <button
-          class="remove-btn"
-          @click=${() => this._removeEntity(index)}
-          title="Remove"
-        >
-          <ha-icon icon="mdi:close"></ha-icon>
-        </button>
+          <ha-textfield
+            label="H (px)"
+            type="number"
+            .value=${entity.height?.toString() ?? "60"}
+            @input=${(ev: InputEvent) =>
+              this._updateEntity(index, "height", Number((ev.target as HTMLInputElement).value) || 60)}
+          ></ha-textfield>
+        </div>
       </div>
     `;
   }

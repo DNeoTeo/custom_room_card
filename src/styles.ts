@@ -253,16 +253,24 @@ export const editorStyles = css`
   }
 
   .entity-row {
+    position: relative;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
     background: var(--secondary-background-color, #f5f5f5);
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 10px 12px;
+    padding-right: 44px;
   }
 
-  .entity-row ha-entity-picker {
-    flex: 1;
+  .entity-row > ha-entity-picker {
+    width: 100%;
+  }
+
+  .entity-row > .remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 6px;
   }
 
   .entity-position {
@@ -305,6 +313,18 @@ export const editorStyles = css`
 
   .remove-btn:hover {
     background: rgba(var(--rgb-error-color, 219, 68, 55), 0.1);
+  }
+
+  .entity-extra-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .entity-extra-row ha-textfield {
+    flex: 1;
+    min-width: 0;
   }
 
   .preview-box {

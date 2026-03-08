@@ -245,16 +245,24 @@ function t(t,e,i,r){var o,s=arguments.length,n=s<3?e:null===r?r=Object.getOwnPro
   }
 
   .entity-row {
+    position: relative;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
     background: var(--secondary-background-color, #f5f5f5);
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 10px 12px;
+    padding-right: 44px;
   }
 
-  .entity-row ha-entity-picker {
-    flex: 1;
+  .entity-row > ha-entity-picker {
+    width: 100%;
+  }
+
+  .entity-row > .remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 6px;
   }
 
   .entity-position {
@@ -297,6 +305,18 @@ function t(t,e,i,r){var o,s=arguments.length,n=s<3?e:null===r?r=Object.getOwnPro
 
   .remove-btn:hover {
     background: rgba(var(--rgb-error-color, 219, 68, 55), 0.1);
+  }
+
+  .entity-extra-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .entity-extra-row ha-textfield {
+    flex: 1;
+    min-width: 0;
   }
 
   .preview-box {
@@ -645,7 +665,15 @@ function t(t,e,i,r){var o,s=arguments.length,n=s<3?e:null===r?r=Object.getOwnPro
           @value-changed=${t=>this._updateEntity(e,"entity",t.detail.value)}
         ></ha-entity-picker>
 
-        <div class="entity-position">
+        <button
+          class="remove-btn"
+          @click=${()=>this._removeEntity(e)}
+          title="Remove"
+        >
+          <ha-icon icon="mdi:close"></ha-icon>
+        </button>
+
+        <div class="entity-extra-row">
           <ha-textfield
             label="Left %"
             type="number"
@@ -664,39 +692,35 @@ function t(t,e,i,r){var o,s=arguments.length,n=s<3?e:null===r?r=Object.getOwnPro
           ></ha-textfield>
         </div>
 
-        <ha-textfield
-          label="Icon"
-          .value=${t.icon??""}
-          @input=${t=>this._updateEntity(e,"icon",t.target.value||void 0)}
-        ></ha-textfield>
+        <div class="entity-extra-row">
+          <ha-textfield
+            label="Icon"
+            .value=${t.icon??""}
+            @input=${t=>this._updateEntity(e,"icon",t.target.value||void 0)}
+          ></ha-textfield>
 
-        <ha-textfield
-          label="Label"
-          .value=${t.label??""}
-          @input=${t=>this._updateEntity(e,"label",t.target.value||void 0)}
-        ></ha-textfield>
+          <ha-textfield
+            label="Label"
+            .value=${t.label??""}
+            @input=${t=>this._updateEntity(e,"label",t.target.value||void 0)}
+          ></ha-textfield>
+        </div>
 
-        <ha-textfield
-          label="W (px)"
-          type="number"
-          .value=${t.width?.toString()??"60"}
-          @input=${t=>this._updateEntity(e,"width",Number(t.target.value)||60)}
-        ></ha-textfield>
+        <div class="entity-extra-row">
+          <ha-textfield
+            label="W (px)"
+            type="number"
+            .value=${t.width?.toString()??"60"}
+            @input=${t=>this._updateEntity(e,"width",Number(t.target.value)||60)}
+          ></ha-textfield>
 
-        <ha-textfield
-          label="H (px)"
-          type="number"
-          .value=${t.height?.toString()??"60"}
-          @input=${t=>this._updateEntity(e,"height",Number(t.target.value)||60)}
-        ></ha-textfield>
-
-        <button
-          class="remove-btn"
-          @click=${()=>this._removeEntity(e)}
-          title="Remove"
-        >
-          <ha-icon icon="mdi:close"></ha-icon>
-        </button>
+          <ha-textfield
+            label="H (px)"
+            type="number"
+            .value=${t.height?.toString()??"60"}
+            @input=${t=>this._updateEntity(e,"height",Number(t.target.value)||60)}
+          ></ha-textfield>
+        </div>
       </div>
     `}_renderNestedCardsSection(){const t=this._config.nested_cards??[];return W`
       <div class="editor-section">
