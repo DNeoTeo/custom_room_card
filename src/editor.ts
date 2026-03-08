@@ -269,6 +269,16 @@ export class CustomRoomCardEditor extends LitElement {
             @input=${(ev: InputEvent) =>
               this._updateEntity(index, "height", Number((ev.target as HTMLInputElement).value) || 60)}
           ></ha-textfield>
+
+          <ha-textfield
+            label="Font (px)"
+            type="number"
+            min="6"
+            max="48"
+            .value=${entity.font_size?.toString() ?? "10"}
+            @input=${(ev: InputEvent) =>
+              this._updateEntity(index, "font_size", Number((ev.target as HTMLInputElement).value) || undefined)}
+          ></ha-textfield>
         </div>
       </div>
     `;

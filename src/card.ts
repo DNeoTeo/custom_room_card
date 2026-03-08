@@ -249,6 +249,9 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       transform: "translate(-50%, -50%)",
       ...((cfg.styles as Record<string, string>) ?? {}),
     };
+    if (cfg.font_size) {
+      btnStyles["--btn-label-size"] = `${cfg.font_size}px`;
+    }
 
     return html`
       <button
