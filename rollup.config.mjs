@@ -7,9 +7,9 @@ import json from "@rollup/plugin-json";
 const dev = process.env.ROLLUP_WATCH;
 
 export default {
-  input: "src/custom-room-card.ts",
+  input: "src/custom_room_card.ts",
   output: {
-    file: "dist/custom-room-card.js",
+    file: "dist/custom_room_card.js",
     format: "es",
     sourcemap: dev ? true : false,
   },

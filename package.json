@@ -2,7 +2,7 @@
   "name": "custom-room-card",
   "version": "1.0.0",
   "description": "A custom Home Assistant Lovelace card for adaptive room layouts with freely positioned entity buttons and customizable backgrounds.",
-  "main": "dist/custom-room-card.js",
+  "main": "dist/custom_room_card.js",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c --watch",
