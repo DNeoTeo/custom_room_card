@@ -47,6 +47,8 @@ export class CustomRoomCardEditor extends LitElement {
       <div class="editor-container">
         <!-- General settings -->
         ${this._renderGeneralSection()}
+        <!-- Text styling section -->
+        ${this._renderTextStyleSection()}
         <!-- Background settings -->
         ${this._renderBackgroundSection()}
         <!-- Entity buttons -->
@@ -113,6 +115,113 @@ export class CustomRoomCardEditor extends LitElement {
             proportionally to the card width relative to the design width
             (<strong>${this._config.design_width ?? 600}px</strong>).
           </span>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Text styling section ───────────────────────────────────────────────────
+
+  private _renderTextStyleSection(): TemplateResult {
+    const titleStyle = this._config.title_style ?? {};
+    const labelStyle = this._config.button_label_style ?? {};
+    const stateStyle = this._config.button_state_style ?? {};
+
+    return html`
+      <div class="editor-section">
+        <div class="section-title">
+          <ha-icon icon="mdi:format-text"></ha-icon>
+          Text Styling
+        </div>
+
+        <!-- Title styling -->
+        <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--divider-color, #e0e0e0);">
+          <h3 style="margin: 0 0 12px 0; color: var(--primary-text-color); font-size: 0.95em;">Title</h3>
+          <div class="form-row">
+            <ha-textfield
+              label="Font Family"
+              .value=${titleStyle.font_family ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("title_style", "font_family", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+            <ha-textfield
+              label="Font Size (px)"
+              type="number"
+              .value=${titleStyle.font_size?.toString() ?? ""}
+              @input=${(ev: InputEvent) => {
+                const v = (ev.target as HTMLInputElement).value;
+                this._updateTextStyle("title_style", "font_size", v ? Number(v) : undefined);
+              }}
+            ></ha-textfield>
+          </div>
+          <div class="form-row">
+            <ha-textfield
+              label="Text Color"
+              .value=${titleStyle.text_color ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("title_style", "text_color", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+          </div>
+        </div>
+
+        <!-- Button label styling -->
+        <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--divider-color, #e0e0e0);">
+          <h3 style="margin: 0 0 12px 0; color: var(--primary-text-color); font-size: 0.95em;">Button Label</h3>
+          <div class="form-row">
+            <ha-textfield
+              label="Font Family"
+              .value=${labelStyle.font_family ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("button_label_style", "font_family", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+            <ha-textfield
+              label="Font Size (px)"
+              type="number"
+              .value=${labelStyle.font_size?.toString() ?? ""}
+              @input=${(ev: InputEvent) => {
+                const v = (ev.target as HTMLInputElement).value;
+                this._updateTextStyle("button_label_style", "font_size", v ? Number(v) : undefined);
+              }}
+            ></ha-textfield>
+          </div>
+          <div class="form-row">
+            <ha-textfield
+              label="Text Color"
+              .value=${labelStyle.text_color ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("button_label_style", "text_color", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+          </div>
+        </div>
+
+        <!-- Button state styling -->
+        <div>
+          <h3 style="margin: 0 0 12px 0; color: var(--primary-text-color); font-size: 0.95em;">Button State</h3>
+          <div class="form-row">
+            <ha-textfield
+              label="Font Family"
+              .value=${stateStyle.font_family ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("button_state_style", "font_family", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+            <ha-textfield
+              label="Font Size (px)"
+              type="number"
+              .value=${stateStyle.font_size?.toString() ?? ""}
+              @input=${(ev: InputEvent) => {
+                const v = (ev.target as HTMLInputElement).value;
+                this._updateTextStyle("button_state_style", "font_size", v ? Number(v) : undefined);
+              }}
+            ></ha-textfield>
+          </div>
+          <div class="form-row">
+            <ha-textfield
+              label="Text Color"
+              .value=${stateStyle.text_color ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("button_state_style", "text_color", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+          </div>
         </div>
       </div>
     `;
@@ -279,6 +388,29 @@ export class CustomRoomCardEditor extends LitElement {
             @input=${(ev: InputEvent) =>
               this._updateEntity(index, "font_size", Number((ev.target as HTMLInputElement).value) || undefined)}
           ></ha-textfield>
+        </div>
+
+        <!-- Button background styling -->
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--divider-color, #e0e0e0);">
+          <label style="display: block; font-size: 0.85em; color: var(--secondary-text-color); margin-bottom: 8px;">
+            Button Background
+          </label>
+          <div class="entity-extra-row">
+            <ha-textfield
+              label="Background Color"
+              .value=${entity.button_background_color ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateEntity(index, "button_background_color", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+          </div>
+          <div class="entity-extra-row">
+            <ha-textfield
+              label="Background Image URL"
+              .value=${entity.button_background_image ?? ""}
+              @input=${(ev: InputEvent) =>
+                this._updateEntity(index, "button_background_image", (ev.target as HTMLInputElement).value || undefined)}
+            ></ha-textfield>
+          </div>
         </div>
       </div>
     `;
@@ -551,6 +683,23 @@ export class CustomRoomCardEditor extends LitElement {
     if (!entities[index]) return;
     (entities[index] as any)[key] = value;
     this._updateConfig("entities", entities);
+  }
+
+  // ── Text style handlers ────────────────────────────────────────────────────
+
+  private _updateTextStyle(
+    styleKey: "title_style" | "button_label_style" | "button_state_style",
+    property: "font_family" | "font_size" | "text_color",
+    value: string | number | undefined
+  ): void {
+    const currentStyle = deepClone((this._config as any)[styleKey] ?? {});
+    if (value === undefined || value === "") {
+      delete currentStyle[property];
+    } else {
+      currentStyle[property] = value;
+    }
+    const isEmptyStyle = Object.keys(currentStyle).length === 0;
+    this._updateConfig(styleKey, isEmptyStyle ? undefined : currentStyle);
   }
 
   // ── Nested card handlers ───────────────────────────────────────────────────

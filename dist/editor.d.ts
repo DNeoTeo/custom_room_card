@@ -14,6 +14,7 @@ export declare class CustomRoomCardEditor extends LitElement {
     setConfig(config: CustomRoomCardConfig): void;
     protected render(): TemplateResult;
     private _renderGeneralSection;
+    private _renderTextStyleSection;
     private _renderBackgroundSection;
     private _renderEntitiesSection;
     private _renderEntityRow;
@@ -24,6 +25,7 @@ export declare class CustomRoomCardEditor extends LitElement {
     private _addEntity;
     private _removeEntity;
     private _updateEntity;
+    private _updateTextStyle;
     private _addNestedCard;
     private _removeNestedCard;
     private _updateNestedCard;

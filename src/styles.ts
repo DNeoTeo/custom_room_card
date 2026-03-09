@@ -14,6 +14,18 @@ export const cardStyles = css`
     --btn-icon-active: var(--primary-color, #2196f3);
     --btn-label-color: var(--secondary-text-color, #727272);
     --btn-label-size: 10px;
+    /* Title styling */
+    --title-font-family: inherit;
+    --title-font-size: 1.2em;
+    --title-text-color: var(--primary-text-color);
+    /* Button label styling */
+    --btn-label-font-family: inherit;
+    --btn-label-font-size: 10px;
+    --btn-label-text-color: var(--secondary-text-color, #727272);
+    /* Button state styling */
+    --btn-state-font-family: inherit;
+    --btn-state-font-size: 9px;
+    --btn-state-text-color: var(--secondary-text-color, #727272);
     display: block;
   }
 
@@ -65,9 +77,10 @@ export const cardStyles = css`
     top: 12px;
     left: 16px;
     z-index: 2;
-    font-size: calc(1.2em * var(--card-scale, 1));
+    font-family: var(--title-font-family);
+    font-size: var(--title-font-size);
     font-weight: 600;
-    color: var(--primary-text-color);
+    color: var(--title-text-color);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
     pointer-events: none;
   }
@@ -125,8 +138,9 @@ export const cardStyles = css`
 
   .entity-btn .btn-label {
     margin-top: 2px;
-    font-size: calc(var(--btn-label-size) * var(--card-scale, 1));
-    color: var(--btn-label-color);
+    font-family: var(--btn-label-font-family);
+    font-size: calc(var(--btn-label-font-size) * var(--card-scale, 1));
+    color: var(--btn-label-text-color);
     text-align: center;
     line-height: 1.2;
     max-width: 100%;
@@ -136,8 +150,9 @@ export const cardStyles = css`
   }
 
   .entity-btn .btn-state {
-    font-size: calc(9px * var(--card-scale, 1));
-    color: var(--btn-label-color);
+    font-family: var(--btn-state-font-family);
+    font-size: calc(var(--btn-state-font-size) * var(--card-scale, 1));
+    color: var(--btn-state-text-color);
     opacity: 0.8;
     text-align: center;
     line-height: 1.1;

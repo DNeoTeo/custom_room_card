@@ -174,6 +174,46 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     const containerStyles: Record<string, string> = {
       "--card-scale": String(this._cardScale),
     };
+    
+    // Apply title text styling
+    if (this._config.title_style) {
+      if (this._config.title_style.font_family) {
+        containerStyles["--title-font-family"] = this._config.title_style.font_family;
+      }
+      if (this._config.title_style.font_size) {
+        containerStyles["--title-font-size"] = `${this._config.title_style.font_size * this._cardScale}px`;
+      }
+      if (this._config.title_style.text_color) {
+        containerStyles["--title-text-color"] = this._config.title_style.text_color;
+      }
+    }
+
+    // Apply button label text styling
+    if (this._config.button_label_style) {
+      if (this._config.button_label_style.font_family) {
+        containerStyles["--btn-label-font-family"] = this._config.button_label_style.font_family;
+      }
+      if (this._config.button_label_style.font_size) {
+        containerStyles["--btn-label-font-size"] = `${this._config.button_label_style.font_size}px`;
+      }
+      if (this._config.button_label_style.text_color) {
+        containerStyles["--btn-label-text-color"] = this._config.button_label_style.text_color;
+      }
+    }
+
+    // Apply button state text styling
+    if (this._config.button_state_style) {
+      if (this._config.button_state_style.font_family) {
+        containerStyles["--btn-state-font-family"] = this._config.button_state_style.font_family;
+      }
+      if (this._config.button_state_style.font_size) {
+        containerStyles["--btn-state-font-size"] = `${this._config.button_state_style.font_size}px`;
+      }
+      if (this._config.button_state_style.text_color) {
+        containerStyles["--btn-state-text-color"] = this._config.button_state_style.text_color;
+      }
+    }
+    
     if (this._config.card_height) {
       containerStyles["--card-height"] = `${this._config.card_height}px`;
     } else if (this._config.aspect_ratio) {
@@ -249,8 +289,19 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       transform: "translate(-50%, -50%)",
       ...((cfg.styles as Record<string, string>) ?? {}),
     };
+    
     if (cfg.font_size) {
       btnStyles["--btn-label-size"] = `${cfg.font_size}px`;
+    }
+    
+    // Apply button background styling
+    if (cfg.button_background_color) {
+      btnStyles["background-color"] = cfg.button_background_color;
+    }
+    if (cfg.button_background_image) {
+      btnStyles["background-image"] = `url('${cfg.button_background_image}')`;
+      btnStyles["background-size"] = "cover";
+      btnStyles["background-position"] = "center";
     }
 
     return html`

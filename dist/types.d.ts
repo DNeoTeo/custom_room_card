@@ -37,6 +37,14 @@ export interface LovelaceCardEditor extends HTMLElement {
     lovelace?: unknown;
     setConfig(config: LovelaceCardConfig): void;
 }
+export interface TextStyleConfig {
+    /** Font family (e.g. "Arial", "Roboto", system fonts) */
+    font_family?: string;
+    /** Font size in px */
+    font_size?: number;
+    /** Text color (CSS color) */
+    text_color?: string;
+}
 export interface EntityButtonConfig {
     /** Entity ID (e.g. light.living_room) */
     entity: string;
@@ -64,6 +72,10 @@ export interface EntityButtonConfig {
     hold_action?: ActionConfig;
     /** Custom CSS styles for this button */
     styles?: Record<string, string>;
+    /** Button background color or image */
+    button_background_color?: string;
+    /** Button background image URL */
+    button_background_image?: string;
 }
 export interface ActionConfig {
     action: "toggle" | "more-info" | "call-service" | "navigate" | "url" | "none";
@@ -109,6 +121,12 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
     background_position?: string;
     /** Background opacity (0-1) */
     background_opacity?: number;
+    /** Title text styling */
+    title_style?: TextStyleConfig;
+    /** Entity button label text styling */
+    button_label_style?: TextStyleConfig;
+    /** Entity button state text styling */
+    button_state_style?: TextStyleConfig;
     /** Card aspect ratio (e.g. "16/9", "4/3", "1/1") */
     aspect_ratio?: string;
     /** Card height in px (overrides aspect_ratio if set) */
