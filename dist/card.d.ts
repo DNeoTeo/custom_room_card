@@ -30,7 +30,11 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     protected render(): TemplateResult;
     private _renderEntityButton;
     private _renderNestedCard;
+    private _renderCustomYamlCard;
     private _createNestedCards;
+    private _createCustomYamlCards;
+    private _parseYamlToConfig;
+    private _parseYamlValue;
     private _createCardElement;
     private _onPointerDown;
     private _onPointerUp;

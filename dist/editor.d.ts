@@ -21,6 +21,8 @@ export declare class CustomRoomCardEditor extends LitElement {
     /** Known built-in HA card types for the dropdown */
     private _renderNestedCardsSection;
     private _renderNestedCardRow;
+    private _renderCustomYamlCardsSection;
+    private _renderCustomYamlRow;
     private _renderPreview;
     private _addEntity;
     private _removeEntity;
@@ -29,6 +31,10 @@ export declare class CustomRoomCardEditor extends LitElement {
     private _addNestedCard;
     private _removeNestedCard;
     private _updateNestedCard;
+    private _openImagePathDialog;
+    private _addCustomYamlCard;
+    private _removeCustomYamlCard;
+    private _updateCustomYamlCard;
     /**
      * Converts a card config object (minus `type`) to a simple YAML-like string.
      * Only handles flat key:value and simple nested objects.
@@ -47,7 +53,6 @@ export declare class CustomRoomCardEditor extends LitElement {
     private _onDotDragStart;
     private _onDotDragEnd;
     private _onPreviewClick;
-    private _onUploadImage;
 }
 declare global {
     interface HTMLElementTagNameMap {

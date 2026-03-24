@@ -150,6 +150,10 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     if (changedProps.has("_config") && this._config?.nested_cards?.length) {
       this._createNestedCards();
     }
+    // Create custom YAML cards on first render or config change
+    if (changedProps.has("_config") && this._config?.custom_yaml_cards?.length) {
+      this._createCustomYamlCards();
+    }
     // Propagate hass to nested cards
     if (changedProps.has("hass")) {
       this._nestedCards.forEach((card) => {
@@ -175,11 +179,13 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       "--card-scale": String(this._cardScale),
     };
     
+    // Apply global font family
+    if (this._config.global_font_family) {
+      containerStyles["--global-font-family"] = this._config.global_font_family;
+    }
+    
     // Apply title text styling
     if (this._config.title_style) {
-      if (this._config.title_style.font_family) {
-        containerStyles["--title-font-family"] = this._config.title_style.font_family;
-      }
       if (this._config.title_style.font_size) {
         containerStyles["--title-font-size"] = `${this._config.title_style.font_size * this._cardScale}px`;
       }
@@ -190,9 +196,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
 
     // Apply button label text styling
     if (this._config.button_label_style) {
-      if (this._config.button_label_style.font_family) {
-        containerStyles["--btn-label-font-family"] = this._config.button_label_style.font_family;
-      }
       if (this._config.button_label_style.font_size) {
         containerStyles["--btn-label-font-size"] = `${this._config.button_label_style.font_size}px`;
       }
@@ -203,9 +206,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
 
     // Apply button state text styling
     if (this._config.button_state_style) {
-      if (this._config.button_state_style.font_family) {
-        containerStyles["--btn-state-font-family"] = this._config.button_state_style.font_family;
-      }
       if (this._config.button_state_style.font_size) {
         containerStyles["--btn-state-font-size"] = `${this._config.button_state_style.font_size}px`;
       }
@@ -258,6 +258,9 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
 
             <!-- Nested cards -->
             ${(this._config.nested_cards ?? []).map((_, i) => this._renderNestedCard(i))}
+
+            <!-- Custom YAML cards -->
+            ${(this._config.custom_yaml_cards ?? []).map((_, i) => this._renderCustomYamlCard(i))}
           </div>
         </div>
       </ha-card>
@@ -292,9 +295,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     
     if (cfg.font_size) {
       btnStyles["--btn-label-size"] = `${cfg.font_size}px`;
-    }
-    if (cfg.font_family) {
-      btnStyles["--btn-label-font-family"] = cfg.font_family;
     }
     
     // Apply button background styling
@@ -352,6 +352,12 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     `;
   }
 
+  private _renderCustomYamlCard(index: number): TemplateResult {
+    return html`
+      <div class="custom-yaml-card-wrapper" id="custom-yaml-${index}"></div>
+    `;
+  }
+
   private async _createNestedCards(): Promise<void> {
     if (!this._config.nested_cards) return;
 
@@ -378,6 +384,103 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
         wrapper.innerHTML = `<div style="color:var(--error-color);padding:8px;">Error loading card</div>`;
       }
     }
+  }
+
+  private async _createCustomYamlCards(): Promise<void> {
+    if (!this._config.custom_yaml_cards) return;
+
+    await this.updateComplete;
+
+    for (let i = 0; i < this._config.custom_yaml_cards.length; i++) {
+      const yamlStr = this._config.custom_yaml_cards[i];
+      const wrapper = this.shadowRoot?.querySelector(`#custom-yaml-${i}`);
+      if (!wrapper) continue;
+
+      // Clear existing content
+      wrapper.innerHTML = "";
+
+      try {
+        // Parse YAML string to config object
+        const cardConfig = this._parseYamlToConfig(yamlStr);
+        if (!cardConfig || !cardConfig.type) {
+          wrapper.innerHTML = `<div style="color:var(--warning-color);padding:8px;">Invalid card config</div>`;
+          continue;
+        }
+
+        const cardEl = await this._createCardElement(cardConfig);
+        if (cardEl) {
+          cardEl.hass = this.hass;
+          wrapper.appendChild(cardEl);
+        }
+      } catch (err) {
+        console.error(`[custom-room-card] Failed to create custom YAML card ${i}:`, err);
+        wrapper.innerHTML = `<div style="color:var(--error-color);padding:8px;">Error: ${(err as Error).message}</div>`;
+      }
+    }
+  }
+
+  private _parseYamlToConfig(yamlStr: string): any {
+    try {
+      // Simple YAML parser for card configs
+      const lines = yamlStr.split('\n');
+      const config: any = {};
+      let currentObj: any = config;
+      const stack: Array<{ key: string; obj: any }> = [];
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+
+        const indent = line.length - line.trimStart().length;
+        const depth = Math.floor(indent / 2);
+
+        // Pop stack if we're back to a shallower depth
+        while (stack.length > depth) {
+          stack.pop();
+        }
+
+        currentObj = stack.length > 0 ? stack[stack.length - 1].obj : config;
+
+        // Match key: value or key:
+        const match = trimmed.match(/^([^:]+):\s*(.*)$/);
+        if (match) {
+          const key = match[1].trim();
+          const value = match[2].trim();
+
+          if (!value || value === '') {
+            // Start of a nested object
+            currentObj[key] = {};
+            stack.push({ key, obj: currentObj[key] });
+          } else {
+            // Parse the value
+            currentObj[key] = this._parseYamlValue(value);
+          }
+        }
+      }
+
+      return config;
+    } catch (err) {
+      console.error('Failed to parse YAML:', err);
+      return null;
+    }
+  }
+
+  private _parseYamlValue(val: string): any {
+    if (!val) return val;
+    if (val === 'true') return true;
+    if (val === 'false') return false;
+    if (val === 'null' || val === '~') return null;
+    if (/^-?\d+(\.\d+)?$/.test(val)) return Number(val);
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      return val.slice(1, -1);
+    }
+    if (val.startsWith('[') && val.endsWith(']')) {
+      try { return JSON.parse(val); } catch { return val; }
+    }
+    if (val.startsWith('{') && val.endsWith('}')) {
+      try { return JSON.parse(val); } catch { return val; }
+    }
+    return val;
   }
 
   private async _createCardElement(

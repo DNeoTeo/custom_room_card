@@ -15,16 +15,18 @@ export const cardStyles = css`
     --btn-label-color: var(--secondary-text-color, #727272);
     --btn-label-size: 10px;
     --btn-label-font: system-ui;
+    /* Global font family for all text */
+    --global-font-family: system-ui;
     /* Title styling */
-    --title-font-family: inherit;
+    --title-font-family: var(--global-font-family);
     --title-font-size: 1.2em;
     --title-text-color: var(--primary-text-color);
     /* Button label styling */
-    --btn-label-font-family: inherit;
+    --btn-label-font-family: var(--global-font-family);
     --btn-label-font-size: 10px;
     --btn-label-text-color: var(--secondary-text-color, #727272);
     /* Button state styling */
-    --btn-state-font-family: inherit;
+    --btn-state-font-family: var(--global-font-family);
     --btn-state-font-size: 9px;
     --btn-state-text-color: var(--secondary-text-color, #727272);
     display: block;
@@ -177,6 +179,24 @@ export const cardStyles = css`
     box-shadow: none !important;
     border: none !important;
     background: transparent !important;
+  }
+
+  /* ── Custom YAML card wrapper ──────────────────────────── */
+  .custom-yaml-card-wrapper {
+    position: absolute;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: var(--ha-card-border-radius, 12px);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 220px;
+    height: auto;
+  }
+
+  .custom-yaml-card-wrapper > * {
+    width: 100%;
+    height: 100%;
   }
 
   /* ── Ripple effect ───────────────────────────────────── */
@@ -543,4 +563,69 @@ export const editorStyles = css`
   .responsive-info strong {
     color: var(--primary-text-color);
   }
+
+  /* ── Custom YAML cards editor ──────────────────────────── */
+  .custom-yaml-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .yaml-card-row {
+    background: var(--secondary-background-color, #f5f5f5);
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid var(--primary-color);
+    position: relative;
+  }
+
+  .yaml-card-row .form-row {
+    position: relative;
+  }
+
+  .yaml-card-row .remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    color: var(--error-color, #db4437);
+    margin: 0;
+  }
+
+  .yaml-editor {
+    width: 100%;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 12px;
+    padding: 10px;
+    border: 1px solid var(--divider-color, #ddd);
+    border-radius: 6px;
+    background: var(--card-background-color, white);
+    color: var(--primary-text-color);
+    resize: vertical;
+    box-sizing: border-box;
+    line-height: 1.5;
+  }
+
+  .yaml-editor:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--rgb-primary-color, 33, 150, 243), 0.1);
+  }
+
+  /* ── Custom YAML card wrappers ────────────────────────── */
+  .custom-yaml-card-wrapper {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 `;
+
+

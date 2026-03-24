@@ -20,7 +20,6 @@ import {
 } from "./types";
 import { editorStyles } from "./styles";
 import { deepClone } from "./helpers";
-import { AVAILABLE_FONTS, uploadImageToHA } from "./fonts";
 
 const EDITOR_TAG = "custom-room-card-editor";
 
@@ -56,6 +55,8 @@ export class CustomRoomCardEditor extends LitElement {
         ${this._renderEntitiesSection()}
         <!-- Nested cards -->
         ${this._renderNestedCardsSection()}
+        <!-- Custom YAML cards -->
+        ${this._renderCustomYamlCardsSection()}
         <!-- Position preview -->
         ${this._renderPreview()}
       </div>
@@ -77,6 +78,13 @@ export class CustomRoomCardEditor extends LitElement {
             .value=${this._config.title ?? ""}
             @input=${(ev: InputEvent) =>
               this._updateConfig("title", (ev.target as HTMLInputElement).value)}
+          ></ha-textfield>
+          <ha-textfield
+            label="Global Font Family"
+            .value=${this._config.global_font_family ?? "system-ui"}
+            placeholder="e.g. Arial, Helvetica, serif, monospace"
+            @input=${(ev: InputEvent) =>
+              this._updateConfig("global_font_family", (ev.target as HTMLInputElement).value || "system-ui")}
           ></ha-textfield>
         </div>
         <div class="form-row">
@@ -140,12 +148,6 @@ export class CustomRoomCardEditor extends LitElement {
           <h3 style="margin: 0 0 12px 0; color: var(--primary-text-color); font-size: 0.95em;">Title</h3>
           <div class="form-row">
             <ha-textfield
-              label="Font Family"
-              .value=${titleStyle.font_family ?? ""}
-              @input=${(ev: InputEvent) =>
-                this._updateTextStyle("title_style", "font_family", (ev.target as HTMLInputElement).value || undefined)}
-            ></ha-textfield>
-            <ha-textfield
               label="Font Size (px)"
               type="number"
               .value=${titleStyle.font_size?.toString() ?? ""}
@@ -154,8 +156,6 @@ export class CustomRoomCardEditor extends LitElement {
                 this._updateTextStyle("title_style", "font_size", v ? Number(v) : undefined);
               }}
             ></ha-textfield>
-          </div>
-          <div class="form-row">
             <ha-textfield
               label="Text Color"
               .value=${titleStyle.text_color ?? ""}
@@ -170,12 +170,6 @@ export class CustomRoomCardEditor extends LitElement {
           <h3 style="margin: 0 0 12px 0; color: var(--primary-text-color); font-size: 0.95em;">Button Label</h3>
           <div class="form-row">
             <ha-textfield
-              label="Font Family"
-              .value=${labelStyle.font_family ?? ""}
-              @input=${(ev: InputEvent) =>
-                this._updateTextStyle("button_label_style", "font_family", (ev.target as HTMLInputElement).value || undefined)}
-            ></ha-textfield>
-            <ha-textfield
               label="Font Size (px)"
               type="number"
               .value=${labelStyle.font_size?.toString() ?? ""}
@@ -184,8 +178,6 @@ export class CustomRoomCardEditor extends LitElement {
                 this._updateTextStyle("button_label_style", "font_size", v ? Number(v) : undefined);
               }}
             ></ha-textfield>
-          </div>
-          <div class="form-row">
             <ha-textfield
               label="Text Color"
               .value=${labelStyle.text_color ?? ""}
@@ -200,12 +192,6 @@ export class CustomRoomCardEditor extends LitElement {
           <h3 style="margin: 0 0 12px 0; color: var(--primary-text-color); font-size: 0.95em;">Button State</h3>
           <div class="form-row">
             <ha-textfield
-              label="Font Family"
-              .value=${stateStyle.font_family ?? ""}
-              @input=${(ev: InputEvent) =>
-                this._updateTextStyle("button_state_style", "font_family", (ev.target as HTMLInputElement).value || undefined)}
-            ></ha-textfield>
-            <ha-textfield
               label="Font Size (px)"
               type="number"
               .value=${stateStyle.font_size?.toString() ?? ""}
@@ -214,8 +200,6 @@ export class CustomRoomCardEditor extends LitElement {
                 this._updateTextStyle("button_state_style", "font_size", v ? Number(v) : undefined);
               }}
             ></ha-textfield>
-          </div>
-          <div class="form-row">
             <ha-textfield
               label="Text Color"
               .value=${stateStyle.text_color ?? ""}
@@ -239,19 +223,23 @@ export class CustomRoomCardEditor extends LitElement {
         </div>
         <div class="form-row">
           <ha-textfield
-            label="Image URL (/local/... or https://...)"
+            label="Image Path (/local/... or https://...)"
+            placeholder="/local/my_image.jpg"
             .value=${this._config.background_image ?? ""}
             @input=${(ev: InputEvent) =>
               this._updateConfig("background_image", (ev.target as HTMLInputElement).value)}
           ></ha-textfield>
           <button 
             class="upload-btn" 
-            @click=${() => this._onUploadImage("background")}
-            title="Upload or select image"
+            @click=${() => this._openImagePathDialog()}
+            title="Browse or enter path"
           >
-            <ha-icon icon="mdi:upload"></ha-icon>
+            <ha-icon icon="mdi:folder-open"></ha-icon>
           </button>
         </div>
+        <p style="font-size: 0.85em; color: var(--secondary-text-color); margin: 8px 0;">
+          <strong>Note:</strong> Upload images to /config/www/ in Home Assistant, then reference them as /local/filename.jpg
+        </p>
         <div class="form-row">
           <ha-textfield
             label="Background Color"
@@ -398,23 +386,6 @@ export class CustomRoomCardEditor extends LitElement {
           ></ha-textfield>
         </div>
 
-        <div class="entity-extra-row">
-          <ha-select
-            label="Font Family"
-            .value=${entity.font_family ?? "system-ui"}
-            @value-changed=${(ev: any) =>
-              this._updateEntity(index, "font_family", ev.detail.value || undefined)}
-          >
-            ${AVAILABLE_FONTS.map(
-              (font) => html`
-                <mwc-list-item .value=${font.value}>
-                  ${font.label}
-                </mwc-list-item>
-              `
-            )}
-          </ha-select>
-        </div>
-
         <!-- Button background styling -->
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--divider-color, #e0e0e0);">
           <label style="display: block; font-size: 0.85em; color: var(--secondary-text-color); margin-bottom: 8px;">
@@ -431,17 +402,11 @@ export class CustomRoomCardEditor extends LitElement {
           <div class="entity-extra-row">
             <ha-textfield
               label="Background Image URL"
+              placeholder="/local/image.jpg or https://..."
               .value=${entity.button_background_image ?? ""}
               @input=${(ev: InputEvent) =>
                 this._updateEntity(index, "button_background_image", (ev.target as HTMLInputElement).value || undefined)}
             ></ha-textfield>
-            <button 
-              class="upload-btn" 
-              @click=${() => this._onUploadImage("button", index)}
-              title="Upload or select image"
-            >
-              <ha-icon icon="mdi:upload"></ha-icon>
-            </button>
           </div>
         </div>
       </div>
@@ -620,6 +585,59 @@ export class CustomRoomCardEditor extends LitElement {
     `;
   }
 
+  // ── Custom YAML cards section ──────────────────────────────────────────────
+
+  private _renderCustomYamlCardsSection(): TemplateResult {
+    const customYamlCards = this._config.custom_yaml_cards ?? [];
+
+    return html`
+      <div class="editor-section">
+        <div class="section-title">
+          <ha-icon icon="mdi:code-json"></ha-icon>
+          Custom YAML Cards
+        </div>
+
+        <p style="font-size: 0.9em; color: var(--secondary-text-color); margin-bottom: 12px;">
+          Add custom Lovelace cards by pasting YAML configuration. Each card will be positioned and displayed independently.
+        </p>
+
+        <div class="custom-yaml-list">
+          ${customYamlCards.map((yaml, i) => this._renderCustomYamlRow(yaml, i))}
+        </div>
+
+        <button class="add-btn" @click=${this._addCustomYamlCard} title="Add custom YAML card">
+          <ha-icon icon="mdi:plus"></ha-icon>
+        </button>
+      </div>
+    `;
+  }
+
+  private _renderCustomYamlRow(yaml: string, index: number): TemplateResult {
+    return html`
+      <div class="yaml-card-row">
+        <div class="form-row">
+          <textarea
+            class="yaml-editor"
+            rows="6"
+            placeholder="Paste your Lovelace card YAML here&#10;e.g.:&#10;type: custom:mushroom-template-card&#10;entity: light.living_room&#10;primary: Living Room Light"
+            .value=${yaml}
+            @change=${(ev: Event) => {
+              const val = (ev.target as HTMLTextAreaElement).value;
+              this._updateCustomYamlCard(index, val);
+            }}
+          ></textarea>
+          <button
+            class="remove-btn"
+            @click=${() => this._removeCustomYamlCard(index)}
+            title="Remove"
+          >
+            <ha-icon icon="mdi:close"></ha-icon>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   // ── Position preview ───────────────────────────────────────────────────────
 
   private _renderPreview(): TemplateResult {
@@ -765,6 +783,34 @@ export class CustomRoomCardEditor extends LitElement {
     this._updateConfig("nested_cards", nestedCards);
   }
 
+  // ── Image path dialog handler ──────────────────────────────────────────────
+
+  private _openImagePathDialog(): void {
+    // Placeholder for future enhancement
+    // Users should manually enter /local/filename.jpg paths in the text field
+  }
+
+  // ── Custom YAML cards handlers ─────────────────────────────────────────────
+
+  private _addCustomYamlCard(): void {
+    const customYamlCards = [...(this._config.custom_yaml_cards ?? [])];
+    customYamlCards.push("");
+    this._updateConfig("custom_yaml_cards", customYamlCards);
+  }
+
+  private _removeCustomYamlCard(index: number): void {
+    const customYamlCards = [...(this._config.custom_yaml_cards ?? [])];
+    customYamlCards.splice(index, 1);
+    this._updateConfig("custom_yaml_cards", customYamlCards);
+  }
+
+  private _updateCustomYamlCard(index: number, yaml: string): void {
+    const customYamlCards = [...(this._config.custom_yaml_cards ?? [])];
+    if (!customYamlCards[index]) return;
+    customYamlCards[index] = yaml;
+    this._updateConfig("custom_yaml_cards", customYamlCards);
+  }
+
   // ── YAML helpers ───────────────────────────────────────────────────────────
 
   /**
@@ -904,42 +950,6 @@ export class CustomRoomCardEditor extends LitElement {
   private _onPreviewClick(_ev: MouseEvent): void {
     // Only act if no drag occurred
     if (this._dragIndex >= 0 && this._dragItemType) return;
-  }
-
-  // ── Image upload handlers ──────────────────────────────────────────────────
-
-  private _onUploadImage(context: "background" | "button", entityIndex?: number): void {
-    // Open file picker
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    
-    input.onchange = async (e: Event) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (!files || !files.length) return;
-
-      const file = files[0];
-      try {
-        // Try to upload to Home Assistant
-        const uploadedPath = await uploadImageToHA(this.hass, file);
-        if (context === "background") {
-          this._updateConfig("background_image", uploadedPath);
-        } else if (context === "button" && entityIndex !== undefined) {
-          this._updateEntity(entityIndex, "button_background_image", uploadedPath);
-        }
-      } catch (error) {
-        // Fallback: just use the filename with /local/ prefix
-        console.warn("Image upload failed, using fallback path:", error);
-        const fallbackPath = `/local/${file.name}`;
-        if (context === "background") {
-          this._updateConfig("background_image", fallbackPath);
-        } else if (context === "button" && entityIndex !== undefined) {
-          this._updateEntity(entityIndex, "button_background_image", fallbackPath);
-        }
-      }
-    };
-
-    input.click();
   }
 }
 

@@ -38,8 +38,6 @@ export interface LovelaceCardEditor extends HTMLElement {
     setConfig(config: LovelaceCardConfig): void;
 }
 export interface TextStyleConfig {
-    /** Font family (e.g. "Arial", "Roboto", system fonts) */
-    font_family?: string;
     /** Font size in px */
     font_size?: number;
     /** Text color (CSS color) */
@@ -58,8 +56,6 @@ export interface EntityButtonConfig {
     height?: number;
     /** Font size in px for label and state (default: 10) */
     font_size?: number;
-    /** Font family (e.g. Arial, Helvetica, serif) */
-    font_family?: string;
     /** Custom icon (mdi:xxx) – defaults to entity domain icon */
     icon?: string;
     /** Custom label */
@@ -123,6 +119,8 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
     background_position?: string;
     /** Background opacity (0-1) */
     background_opacity?: number;
+    /** Global font family for all text in the card */
+    global_font_family?: string;
     /** Title text styling */
     title_style?: TextStyleConfig;
     /** Entity button label text styling */
@@ -144,6 +142,8 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
     entities?: EntityButtonConfig[];
     /** Nested Lovelace cards */
     nested_cards?: NestedCardConfig[];
+    /** Custom YAML cards (as raw YAML strings) */
+    custom_yaml_cards?: string[];
     /** Show room title overlay */
     show_title?: boolean;
     /** Custom CSS for the whole card */
