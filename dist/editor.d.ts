@@ -47,6 +47,7 @@ export declare class CustomRoomCardEditor extends LitElement {
     private _onDotDragStart;
     private _onDotDragEnd;
     private _onPreviewClick;
+    private _onUploadImage;
 }
 declare global {
     interface HTMLElementTagNameMap {

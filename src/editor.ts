@@ -20,6 +20,7 @@ import {
 } from "./types";
 import { editorStyles } from "./styles";
 import { deepClone } from "./helpers";
+import { AVAILABLE_FONTS, uploadImageToHA } from "./fonts";
 
 const EDITOR_TAG = "custom-room-card-editor";
 
@@ -243,6 +244,13 @@ export class CustomRoomCardEditor extends LitElement {
             @input=${(ev: InputEvent) =>
               this._updateConfig("background_image", (ev.target as HTMLInputElement).value)}
           ></ha-textfield>
+          <button 
+            class="upload-btn" 
+            @click=${() => this._onUploadImage("background")}
+            title="Upload or select image"
+          >
+            <ha-icon icon="mdi:upload"></ha-icon>
+          </button>
         </div>
         <div class="form-row">
           <ha-textfield
@@ -390,6 +398,23 @@ export class CustomRoomCardEditor extends LitElement {
           ></ha-textfield>
         </div>
 
+        <div class="entity-extra-row">
+          <ha-select
+            label="Font Family"
+            .value=${entity.font_family ?? "system-ui"}
+            @value-changed=${(ev: any) =>
+              this._updateEntity(index, "font_family", ev.detail.value || undefined)}
+          >
+            ${AVAILABLE_FONTS.map(
+              (font) => html`
+                <mwc-list-item .value=${font.value}>
+                  ${font.label}
+                </mwc-list-item>
+              `
+            )}
+          </ha-select>
+        </div>
+
         <!-- Button background styling -->
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--divider-color, #e0e0e0);">
           <label style="display: block; font-size: 0.85em; color: var(--secondary-text-color); margin-bottom: 8px;">
@@ -410,6 +435,13 @@ export class CustomRoomCardEditor extends LitElement {
               @input=${(ev: InputEvent) =>
                 this._updateEntity(index, "button_background_image", (ev.target as HTMLInputElement).value || undefined)}
             ></ha-textfield>
+            <button 
+              class="upload-btn" 
+              @click=${() => this._onUploadImage("button", index)}
+              title="Upload or select image"
+            >
+              <ha-icon icon="mdi:upload"></ha-icon>
+            </button>
           </div>
         </div>
       </div>
@@ -872,6 +904,42 @@ export class CustomRoomCardEditor extends LitElement {
   private _onPreviewClick(_ev: MouseEvent): void {
     // Only act if no drag occurred
     if (this._dragIndex >= 0 && this._dragItemType) return;
+  }
+
+  // ── Image upload handlers ──────────────────────────────────────────────────
+
+  private _onUploadImage(context: "background" | "button", entityIndex?: number): void {
+    // Open file picker
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    
+    input.onchange = async (e: Event) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || !files.length) return;
+
+      const file = files[0];
+      try {
+        // Try to upload to Home Assistant
+        const uploadedPath = await uploadImageToHA(this.hass, file);
+        if (context === "background") {
+          this._updateConfig("background_image", uploadedPath);
+        } else if (context === "button" && entityIndex !== undefined) {
+          this._updateEntity(entityIndex, "button_background_image", uploadedPath);
+        }
+      } catch (error) {
+        // Fallback: just use the filename with /local/ prefix
+        console.warn("Image upload failed, using fallback path:", error);
+        const fallbackPath = `/local/${file.name}`;
+        if (context === "background") {
+          this._updateConfig("background_image", fallbackPath);
+        } else if (context === "button" && entityIndex !== undefined) {
+          this._updateEntity(entityIndex, "button_background_image", fallbackPath);
+        }
+      }
+    };
+
+    input.click();
   }
 }
 

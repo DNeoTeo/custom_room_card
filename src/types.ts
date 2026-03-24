@@ -74,6 +74,8 @@ export interface EntityButtonConfig {
   height?: number;
   /** Font size in px for label and state (default: 10) */
   font_size?: number;
+  /** Font family (e.g. Arial, Helvetica, serif) */
+  font_family?: string;
   /** Custom icon (mdi:xxx) – defaults to entity domain icon */
   icon?: string;
   /** Custom label */

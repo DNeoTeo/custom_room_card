@@ -14,6 +14,7 @@ export const cardStyles = css`
     --btn-icon-active: var(--primary-color, #2196f3);
     --btn-label-color: var(--secondary-text-color, #727272);
     --btn-label-size: 10px;
+    --btn-label-font: system-ui;
     /* Title styling */
     --title-font-family: inherit;
     --title-font-size: 1.2em;
@@ -299,7 +300,8 @@ export const editorStyles = css`
   }
 
   .add-btn,
-  .remove-btn {
+  .remove-btn,
+  .upload-btn {
     cursor: pointer;
     border: none;
     border-radius: 50%;
@@ -319,6 +321,21 @@ export const editorStyles = css`
 
   .add-btn:hover {
     opacity: 0.85;
+  }
+
+  .upload-btn {
+    background: var(--primary-color);
+    color: white;
+    margin-left: 4px;
+    flex-shrink: 0;
+  }
+
+  .upload-btn:hover {
+    opacity: 0.85;
+  }
+
+  .upload-btn ha-icon {
+    --mdc-icon-size: 18px;
   }
 
   .remove-btn {

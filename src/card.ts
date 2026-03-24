@@ -293,6 +293,9 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     if (cfg.font_size) {
       btnStyles["--btn-label-size"] = `${cfg.font_size}px`;
     }
+    if (cfg.font_family) {
+      btnStyles["--btn-label-font-family"] = cfg.font_family;
+    }
     
     // Apply button background styling
     if (cfg.button_background_color) {
