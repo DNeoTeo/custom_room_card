@@ -117,8 +117,16 @@ export interface NestedCardConfig {
   z_index?: number;
   /** CSS border-radius override */
   border_radius?: string;
-  /** Hide the card's own ha-card shadow/border */
-  hide_card_border?: boolean;
+  /** Background color */
+  background_color?: string;
+  /** Background image URL or /local/ path */
+  background_image?: string;
+  /** Background opacity (0-1) */
+  background_opacity?: number;
+  /** Background size (cover, contain, etc) */
+  background_size?: string;
+  /** Background position (center, top left, etc) */
+  background_position?: string;
   /** Custom CSS styles applied to the wrapper */
   styles?: Record<string, string>;
 }
@@ -129,7 +137,9 @@ export const DEFAULT_NESTED_CARD: Partial<NestedCardConfig> = {
   width: "200px",
   height: "auto",
   z_index: 2,
-  hide_card_border: false,
+  background_opacity: 1,
+  background_size: "cover",
+  background_position: "center",
 };
 
 export interface CustomRoomCardConfig extends LovelaceCardConfig {

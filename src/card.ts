@@ -298,19 +298,25 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     }
     
     // Apply button background styling
-    if (cfg.button_background_color) {
-      btnStyles["background-color"] = cfg.button_background_color;
-    }
-    if (cfg.button_background_image) {
-      btnStyles["background-image"] = `url('${cfg.button_background_image}')`;
-      btnStyles["background-size"] = "cover";
-      btnStyles["background-position"] = "center";
+    let styleString = styleMap(btnStyles);
+    if (cfg.button_background_color || cfg.button_background_image) {
+      // Build style string with !important to override CSS defaults
+      let customBg = "";
+      if (cfg.button_background_color) {
+        customBg += `background-color: ${cfg.button_background_color} !important; `;
+      }
+      if (cfg.button_background_image) {
+        customBg += `background-image: url('${cfg.button_background_image}') !important; `;
+        customBg += `background-size: cover !important; `;
+        customBg += `background-position: center !important; `;
+      }
+      styleString = styleString + customBg;
     }
 
     return html`
       <button
         class=${classMap(btnClasses)}
-        style=${styleMap(btnStyles)}
+        style=${styleString}
         @pointerdown=${(ev: PointerEvent) => this._onPointerDown(ev, cfg)}
         @pointerup=${() => this._onPointerUp(cfg)}
         @pointercancel=${() => this._cancelHold()}
@@ -341,11 +347,28 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       transform: "translate(-50%, -50%)",
       "z-index": String(ncCfg.z_index ?? 2),
       ...(ncCfg.border_radius ? { "border-radius": ncCfg.border_radius, overflow: "hidden" } : {}),
-      ...((ncCfg.styles as Record<string, string>) ?? {}),
     };
 
+    // Apply background styling for nested card wrapper
+    if (ncCfg.background_color) {
+      wrapperStyles["background-color"] = ncCfg.background_color;
+      if (ncCfg.background_opacity !== undefined) {
+        wrapperStyles["opacity"] = String(ncCfg.background_opacity);
+      }
+    }
+    if (ncCfg.background_image) {
+      wrapperStyles["background-image"] = `url('${ncCfg.background_image}')`;
+      wrapperStyles["background-size"] = ncCfg.background_size || "cover";
+      wrapperStyles["background-position"] = ncCfg.background_position || "center";
+    }
+
+    // Apply custom styles
+    if (ncCfg.styles) {
+      Object.assign(wrapperStyles, ncCfg.styles);
+    }
+
     return html`
-      <div class="nested-card-wrapper ${ncCfg.hide_card_border ? "no-border" : ""}"
+      <div class="nested-card-wrapper"
            style=${styleMap(wrapperStyles)}
            id="nested-${index}">
       </div>

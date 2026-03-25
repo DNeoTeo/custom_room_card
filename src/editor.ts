@@ -569,16 +569,54 @@ export class CustomRoomCardEditor extends LitElement {
                 this._updateNestedCard(index, "border_radius", (ev.target as HTMLInputElement).value || undefined)}
             ></ha-textfield>
           </div>
-          <div class="form-row">
-            <label class="checkbox-row">
-              <input
-                type="checkbox"
-                .checked=${nc.hide_card_border ?? false}
-                @change=${(ev: Event) =>
-                  this._updateNestedCard(index, "hide_card_border", (ev.target as HTMLInputElement).checked)}
-              />
-              Hide card border/shadow (transparent background)
+
+          <!-- Background styling for nested card -->
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--divider-color, #e0e0e0);">
+            <label style="display: block; font-size: 0.85em; color: var(--secondary-text-color); margin-bottom: 8px;">
+              Background
             </label>
+            <div class="form-row">
+              <ha-textfield
+                label="Background Color"
+                placeholder="#ffffff or rgba(...)"
+                .value=${nc.background_color ?? ""}
+                @input=${(ev: InputEvent) =>
+                  this._updateNestedCard(index, "background_color", (ev.target as HTMLInputElement).value || undefined)}
+              ></ha-textfield>
+              <ha-textfield
+                label="Opacity (0-1)"
+                type="number"
+                min="0"
+                max="1"
+                step="0.1"
+                .value=${nc.background_opacity?.toString() ?? "1"}
+                @input=${(ev: InputEvent) =>
+                  this._updateNestedCard(index, "background_opacity", Number((ev.target as HTMLInputElement).value))}
+              ></ha-textfield>
+            </div>
+            <div class="form-row">
+              <ha-textfield
+                label="Background Image"
+                placeholder="/local/image.jpg or https://..."
+                .value=${nc.background_image ?? ""}
+                @input=${(ev: InputEvent) =>
+                  this._updateNestedCard(index, "background_image", (ev.target as HTMLInputElement).value || undefined)}
+              ></ha-textfield>
+            </div>
+            <div class="form-row">
+              <ha-textfield
+                label="Size (cover, contain, 100%)"
+                .value=${nc.background_size ?? "cover"}
+                @input=${(ev: InputEvent) =>
+                  this._updateNestedCard(index, "background_size", (ev.target as HTMLInputElement).value || "cover")}
+              ></ha-textfield>
+              <ha-textfield
+                label="Position (center, top left…)"
+                .value=${nc.background_position ?? "center"}
+                @input=${(ev: InputEvent) =>
+                  this._updateNestedCard(index, "background_position", (ev.target as HTMLInputElement).value || "center")}
+              ></ha-textfield>
+            </div>
           </div>
         </details>
       </div>
