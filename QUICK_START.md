@@ -4,16 +4,34 @@
 
 Your Custom Room Card now supports:
 
-### 1. Text Styling
+### 1. Global Font Family
+Control the font for all text in one place:
+- Set once in "General" section → applies to title, button labels, and state text
+- Supports system fonts, Google Fonts, custom CSS font families
+
+### 2. Text Styling
 Customize the appearance of text elements:
-- **Title** - Change the title font, size, and color
+- **Title** - Change font size and color
 - **Button Labels** - Style the text below icons
 - **Button State** - Style the state text (e.g., "on", "off", "auto")
 
-### 2. Button Backgrounds
+### 3. Button Backgrounds
 Give each button a custom look:
 - **Background Color** - Solid colors or transparent (rgba)
 - **Background Image** - Local or external image URLs
+- **Overlay Mode** - Toggle transparent-children mode to hide button UI
+
+### 4. Nested Card Backgrounds
+Customize the background of nested cards:
+- Add images or colors to card wrappers
+- Use transparent-children mode to hide card borders/shadows
+- Perfect for photo overlays or branded designs
+
+### 5. Custom YAML Cards
+Directly paste Lovelace card YAML for advanced configurations:
+- Use any card type (built-in or custom)
+- Positioned automatically or customized
+- Full YAML support with no limitations
 
 ---
 
@@ -154,7 +172,44 @@ button_background_image: "https://example.com/icon.png"
 
 ---
 
-## 💡 Tips & Tricks
+## � Advanced Features
+
+### Background Overlay Mode
+Hide card UI (borders, shadows) to show only the background:
+
+```yaml
+nested_cards:
+  - card:
+      type: gauge
+      entity: sensor.temperature
+    left: 50
+    top: 50
+    width: "150px"
+    background_image: /local/gauge-bg.jpg
+    background_overlay_mode: transparent-children
+```
+
+### Custom YAML Cards
+Paste any Lovelace card YAML directly:
+
+```yaml
+custom_yaml_cards:
+  - type: custom:mushroom-template-card
+    entity: light.main
+    layout: horizontal
+    icon_type: icon
+```
+
+### Global Font Family
+Set font for entire card in one place:
+
+```yaml
+global_font_family: "'Roboto', sans-serif"  # Applies to title, labels, state
+```
+
+---
+
+## �💡 Tips & Tricks
 
 ✅ **Combine Color + Image**
 - Set both background color and image

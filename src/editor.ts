@@ -1,8 +1,15 @@
 /**
  * custom-room-card-editor – Visual configuration editor.
  *
- * Provides a graphical UI inside the Home Assistant card editor to configure
- * background, entity buttons with drag-preview, and basic card options.
+ * Provides a comprehensive GUI for editing:
+ * - General card settings (title, global font, aspect ratio)
+ * - Text styling (title, button labels, entity state)
+ * - Background images and colors with positioning/opacity control
+ * - Entity button positioning, sizing, icons, labels, and backgrounds
+ * - Nested card configuration with YAML editor and background customization
+ * - Background overlay modes (normal or transparent-children)
+ * - Custom YAML card support with full YAML textarea editing
+ * - Live position preview with drag indicators
  */
 
 import { LitElement, html, nothing, TemplateResult } from "lit";

@@ -150,6 +150,55 @@ entities:
 
 ---
 
+## 🆕 Recent Additions
+
+### 3. **Global Font Family** (v1.0.0)
+- Single `global_font_family` option in config applies to all text
+- CSS variable: `--global-font-family`
+- All text elements (title, labels, state) inherit from it
+- **Use case**: Centralized typography control
+
+### 4. **Background Overlay Modes** (v1.0.0)
+- New property: `background_overlay_mode: "normal" | "transparent-children"`
+- Available on: `EntityButtonConfig` and `NestedCardConfig`
+- **Transparent-children mode**: Hides card UI (borders, shadows) to show wrapper background only
+- **CSS class**: `.bg-overlay-transparent-children` applies transparent styling to children
+
+```typescript
+// In card.ts
+const wrapperClasses = {
+  "nested-card-wrapper": true,
+  "bg-overlay-transparent-children": ncCfg.background_overlay_mode === "transparent-children",
+};
+```
+
+### 5. **Nested Card Backgrounds** (v1.0.0)
+- Enhanced `NestedCardConfig` with background styling properties:
+  - `background_color` - CSS color or rgba
+  - `background_image` - URL to image
+  - `background_opacity` - Value 0-1
+  - `background_size` - CSS background-size value
+  - `background_position` - CSS background-position value
+- Applied to wrapper div containing the nested card
+- Works with overlay mode for dynamic styling
+
+### 6. **Custom YAML Cards** (v1.0.0)
+- New config property: `custom_yaml_cards: string[]`
+- Each element is raw YAML string of a complete Lovelace card
+- Parser: `_parseYamlToConfig()` in card.ts converts YAML to object
+- Rendering: `_createCustomYamlCards()` instantiates ha-card elements
+- Positioned with wrapper divs (default: centered)
+- **Use case**: Embed complex custom cards without any limitations
+
+```typescript
+private _parseYamlToConfig(yamlStr: string): any {
+  // Line-by-line YAML parsing with indentation-based nesting
+  // Supports nested objects, arrays, boolean/number/string values
+}
+```
+
+---
+
 ## 📦 Deliverables
 
 ### Updated Files

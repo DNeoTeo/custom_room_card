@@ -1,8 +1,14 @@
 /**
  * custom-room-card – Main Lovelace card element.
  *
- * An adaptive room layout card with freely-positioned entity buttons,
- * customizable background, and support for nested cards.
+ * An adaptive room layout card with:
+ * - Freely-positioned entity buttons with custom backgrounds and overlay modes
+ * - Customizable card background (color, image, opacity)
+ * - Nested Lovelace cards with full background styling
+ * - Custom YAML cards for advanced configurations
+ * - Global font family and text styling (title, labels, state)
+ * - Responsive design with automatic scaling
+ * - Drag-and-drop positioning preview in editor
  */
 
 import { LitElement, html, nothing, PropertyValues, TemplateResult } from "lit";

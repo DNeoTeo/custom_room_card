@@ -12,12 +12,18 @@ A custom [Home Assistant](https://www.home-assistant.io/) Lovelace card that let
 
 ## Features
 
-- **Custom background** – Use any local image (`/local/...`) or external URL
-- **Freely positioned buttons** – Place entity buttons anywhere using `left` / `top` percentages
-- **Adaptive layout** – Configurable aspect ratio (`16/9`, `4/3`, `1/1`…) or fixed height
+- **Custom background** – Use any local image (`/local/...`), external URL, or solid color with opacity control
+- **Freely positioned buttons** – Place entity buttons anywhere using `left`/`top` percentages
+- **Adaptive layout** – Configurable aspect ratio (`16/9`, `4/3`, `1/1`…) or fixed height with responsive scaling
 - **Entity actions** – Tap to toggle, hold for more-info (fully configurable)
-- **Nested cards** – Embed any standard Lovelace card inside the room layout
-- **Visual editor** – Full GUI editor with drag-and-drop position preview
+- **Button backgrounds** – Custom colors and images for individual buttons with transparent overlay mode
+- **Nested cards** – Embed any Lovelace card (built-in or custom) with full background customization
+- **Background overlay modes** – Toggle between normal rendering or transparent-children mode to hide nested card backgrounds
+- **Custom YAML cards** – Directly paste Lovelace card YAML for complete flexibility
+- **Global font family** – Single setting to control all text styling (title, labels, state)
+- **Text styling** – Customize font sizes and colors for title, button labels, and entity state
+- **Visual editor** – Full GUI editor with live position preview
+- **Responsive design** – All sizes automatically scale to fit screen width
 - **Theming** – Respects HA theme variables, supports custom CSS overrides
 - **HACS compatible** – One-click install via HACS
 
@@ -147,6 +153,7 @@ nested_cards:
 | `type`               | string   | *required* | Must be `custom:custom-room-card`                   |
 | `title`              | string   | —          | Room title shown in the top-left overlay            |
 | `show_title`         | boolean  | `true`     | Show / hide the title overlay                       |
+| `global_font_family` | string   | `system-ui`| Font family for all text (title, labels, state)     |
 | `background_image`   | string   | —          | Image URL (`/local/...` or `https://...`)           |
 | `background_color`   | string   | —          | CSS background color                                |
 | `background_size`    | string   | `cover`    | CSS `background-size`                               |
@@ -154,26 +161,34 @@ nested_cards:
 | `background_opacity` | number   | `1`        | Background opacity (0 – 1)                          |
 | `aspect_ratio`       | string   | `16/9`     | Card aspect ratio (e.g. `16/9`, `4/3`, `1/1`)      |
 | `card_height`        | number   | —          | Fixed card height in px (overrides `aspect_ratio`)  |
+| `title_style`        | object   | —          | Title styling (font_size, text_color)               |
+| `button_label_style` | object   | —          | Button label styling (font_size, text_color)        |
+| `button_state_style` | object   | —          | Entity state text styling (font_size, text_color)   |
 | `entities`           | list     | `[]`       | Array of entity button configurations               |
 | `nested_cards`       | list     | `[]`       | Array of nested Lovelace card configurations        |
+| `custom_yaml_cards`  | list     | `[]`       | Array of custom YAML card configurations            |
 | `card_styles`        | object   | —          | Custom CSS key/value pairs for the `<ha-card>`      |
 
 ### Entity button options
 
-| Option        | Type    | Default        | Description                                    |
-| ------------- | ------- | -------------- | ---------------------------------------------- |
-| `entity`      | string  | *required*     | Entity ID (e.g. `light.living_room`)           |
-| `left`        | number  | `50`           | Horizontal position in % (0–100)               |
-| `top`         | number  | `50`           | Vertical position in % (0–100)                 |
-| `width`       | number  | `60`           | Button width in px                             |
-| `height`      | number  | `60`           | Button height in px                            |
-| `icon`        | string  | *auto*         | MDI icon (e.g. `mdi:lightbulb`)                |
-| `label`       | string  | *friendly_name*| Custom label text                              |
-| `show_label`  | boolean | `true`         | Show label below icon                          |
-| `show_state`  | boolean | `false`        | Show entity state text                         |
-| `tap_action`  | object  | `toggle`       | Action on tap (see Actions)                    |
-| `hold_action` | object  | `more-info`    | Action on long-press (see Actions)             |
-| `styles`      | object  | —              | Custom CSS key/value pairs for this button     |
+| Option                    | Type    | Default        | Description                                    |
+| ------------------------- | ------- | -------------- | ---------------------------------------------- |
+| `entity`                  | string  | *required*     | Entity ID (e.g. `light.living_room`)           |
+| `left`                    | number  | `50`           | Horizontal position in % (0–100)               |
+| `top`                     | number  | `50`           | Vertical position in % (0–100)                 |
+| `width`                   | number  | `60`           | Button width in px                             |
+| `height`                  | number  | `60`           | Button height in px                            |
+| `icon`                    | string  | *auto*         | MDI icon (e.g. `mdi:lightbulb`)                |
+| `label`                   | string  | *friendly_name*| Custom label text                              |
+| `show_label`              | boolean | `true`         | Show label below icon                          |
+| `show_state`              | boolean | `false`        | Show entity state text                         |
+| `font_size`               | number  | `10`           | Font size in px for label and state            |
+| `tap_action`              | object  | `toggle`       | Action on tap (see Actions)                    |
+| `hold_action`             | object  | `more-info`    | Action on long-press (see Actions)             |
+| `button_background_color` | string  | —              | CSS color or rgba (e.g. `rgba(255,0,0,0.5)`)   |
+| `button_background_image` | string  | —              | Image URL (`/local/...` or `https://...`)      |
+| `background_overlay_mode` | string  | `normal`       | `normal` or `transparent-children` (hides nested children backgrounds) |
+| `styles`                  | object  | —              | Custom CSS key/value pairs for this button     |
 
 ### Actions
 
@@ -191,18 +206,23 @@ tap_action:
 
 You can embed **any Lovelace card** (built-in or custom) and position it freely.
 
-| Option             | Type    | Default    | Description                                              |
-| ------------------ | ------- | ---------- | -------------------------------------------------------- |
-| `card`             | object  | *required* | Standard Lovelace card configuration (with `type`)       |
-| `left`             | number  | `50`       | Horizontal position in % (0–100)                         |
-| `top`              | number  | `50`       | Vertical position in % (0–100)                           |
-| `width`            | string  | `200px`    | Width – CSS value: `120px`, `30%`, `auto`                |
-| `height`           | string  | `auto`     | Height – CSS value: `60px`, `20%`, `auto`                |
-| `label`            | string  | —          | Label shown in the editor preview only                   |
-| `z_index`          | number  | `2`        | Layer order (higher = on top)                            |
-| `border_radius`    | string  | —          | CSS border-radius override                               |
-| `hide_card_border` | boolean | `false`    | Hide card shadow/border (transparent background)         |
-| `styles`           | object  | —          | Custom CSS key/value pairs for the wrapper               |
+| Option                    | Type    | Default    | Description                                              |
+| ------------------------- | ------- | ---------- | -------------------------------------------------------- |
+| `card`                    | object  | *required* | Standard Lovelace card configuration (with `type`)       |
+| `left`                    | number  | `50`       | Horizontal position in % (0–100)                         |
+| `top`                     | number  | `50`       | Vertical position in % (0–100)                           |
+| `width`                   | string  | `200px`    | Width – CSS value: `120px`, `30%`, `auto`                |
+| `height`                  | string  | `auto`     | Height – CSS value: `60px`, `20%`, `auto`                |
+| `label`                   | string  | —          | Label shown in the editor preview only                   |
+| `z_index`                 | number  | `2`        | Layer order (higher = on top)                            |
+| `border_radius`           | string  | —          | CSS border-radius (e.g. `16px`)                          |
+| `background_color`        | string  | —          | Background CSS color or rgba                             |
+| `background_image`        | string  | —          | Background image URL (`/local/...` or `https://...`)     |
+| `background_opacity`      | number  | `1`        | Background opacity (0–1)                                 |
+| `background_size`         | string  | `cover`    | CSS `background-size` (cover, contain, 100%, etc.)       |
+| `background_position`     | string  | `center`   | CSS `background-position` (center, top left, etc.)       |
+| `background_overlay_mode` | string  | `normal`   | `normal` or `transparent-children` (hides nested card UI) |
+| `styles`                  | object  | —          | Custom CSS key/value pairs for the wrapper               |
 
 #### Nested card examples
 
@@ -283,6 +303,69 @@ nested_cards:
     width: "300px"
     z_index: 3
 ```
+
+## Custom YAML Cards
+
+You can also embed Lovelace cards by pasting complete YAML directly. This is useful for complex custom cards and advanced configurations.
+
+```yaml
+custom_yaml_cards:
+  - type: custom:mushroom-template-card
+    entity: light.living_room
+    layout: horizontal
+    icon: mdi:sofa-outline
+    tap_action:
+      action: toggle
+    card_mod:
+      style:
+        mushroom-shape-icon$: |
+          .shape {
+            --icon-color: {% if is_state('light.living_room', 'on') %} #ff7600 {% endif %};
+          }
+```
+
+**Position custom YAML cards:**
+```yaml
+custom_yaml_cards:
+  - type: sensor
+    entity: sensor.temperature
+```
+*Note: Custom YAML cards are centered by default, you can adjust positioning by modifying the CSS wrapper.*
+
+---
+
+## Background Overlay Modes
+
+By default, nested cards and buttons display their own backgrounds (card borders, shadows, etc.). With `background_overlay_mode: "transparent-children"`, you can hide the internal card UI and show only the wrapper background.
+
+### Normal mode (default)
+```yaml
+nested_cards:
+  - card:
+      type: gauge
+      entity: sensor.humidity
+    left: 50
+    top: 50
+    background_image: /local/gauge-bg.png
+    background_overlay_mode: normal  # Card border/shadow visible
+```
+
+### Transparent-children mode
+```yaml
+nested_cards:
+  - card:
+      type: gauge
+      entity: sensor.humidity
+    left: 50
+    top: 50
+    background_image: /local/gauge-bg.jpg
+    background_overlay_mode: transparent-children  # Card UI hidden, only background shows
+```
+
+This mode works great for:
+- **Photo backgrounds** – Show room photos with overlaid content
+- **Custom gauges** – Transparent card UI over styled backgrounds
+- **Branded layouts** – Blend cards into custom designs
 
 ---
 
