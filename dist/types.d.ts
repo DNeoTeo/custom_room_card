@@ -68,12 +68,14 @@ export interface EntityButtonConfig {
     tap_action?: ActionConfig;
     /** Custom hold action */
     hold_action?: ActionConfig;
-    /** Custom CSS styles for this button */
-    styles?: Record<string, string>;
     /** Button background color or image */
     button_background_color?: string;
     /** Button background image URL */
     button_background_image?: string;
+    /** Background overlay mode: 'normal' (default) or 'transparent-children' (hide child backgrounds) */
+    background_overlay_mode?: "normal" | "transparent-children";
+    /** Custom CSS styles for this button */
+    styles?: Record<string, string>;
 }
 export interface ActionConfig {
     action: "toggle" | "more-info" | "call-service" | "navigate" | "url" | "none";
@@ -109,6 +111,8 @@ export interface NestedCardConfig {
     background_size?: string;
     /** Background position (center, top left, etc) */
     background_position?: string;
+    /** Background overlay mode: 'normal' (default) or 'transparent-children' (hide child backgrounds) */
+    background_overlay_mode?: "normal" | "transparent-children";
     /** Custom CSS styles applied to the wrapper */
     styles?: Record<string, string>;
 }

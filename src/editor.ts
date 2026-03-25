@@ -408,6 +408,17 @@ export class CustomRoomCardEditor extends LitElement {
                 this._updateEntity(index, "button_background_image", (ev.target as HTMLInputElement).value || undefined)}
             ></ha-textfield>
           </div>
+          <div class="entity-extra-row">
+            <ha-select
+              label="Background Mode"
+              .value=${entity.background_overlay_mode ?? "normal"}
+              @value-changed=${(ev: CustomEvent) =>
+                this._updateEntity(index, "background_overlay_mode", ev.detail.value)}
+            >
+              <mwc-list-item value="normal">Normal</mwc-list-item>
+              <mwc-list-item value="transparent-children">Transparent Children</mwc-list-item>
+            </ha-select>
+          </div>
         </div>
       </div>
     `;
@@ -616,6 +627,17 @@ export class CustomRoomCardEditor extends LitElement {
                 @input=${(ev: InputEvent) =>
                   this._updateNestedCard(index, "background_position", (ev.target as HTMLInputElement).value || "center")}
               ></ha-textfield>
+            </div>
+            <div class="form-row">
+              <ha-select
+                label="Background Mode"
+                .value=${nc.background_overlay_mode ?? "normal"}
+                @value-changed=${(ev: CustomEvent) =>
+                  this._updateNestedCard(index, "background_overlay_mode", ev.detail.value)}
+              >
+                <mwc-list-item value="normal">Normal (background + card content)</mwc-list-item>
+                <mwc-list-item value="transparent-children">Transparent Children (hide child cards)</mwc-list-item>
+              </ha-select>
             </div>
           </div>
         </details>

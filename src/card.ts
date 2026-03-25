@@ -281,6 +281,7 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       "entity-btn": true,
       active,
       unavailable,
+      "bg-overlay-transparent-children": cfg.background_overlay_mode === "transparent-children",
     };
 
     const scale = this._cardScale;
@@ -367,8 +368,13 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       Object.assign(wrapperStyles, ncCfg.styles);
     }
 
+    const wrapperClasses = {
+      "nested-card-wrapper": true,
+      "bg-overlay-transparent-children": ncCfg.background_overlay_mode === "transparent-children",
+    };
+
     return html`
-      <div class="nested-card-wrapper"
+      <div class=${classMap(wrapperClasses)}
            style=${styleMap(wrapperStyles)}
            id="nested-${index}">
       </div>

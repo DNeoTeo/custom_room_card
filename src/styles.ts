@@ -626,6 +626,24 @@ export const editorStyles = css`
     align-items: center;
     justify-content: center;
   }
+
+  /* ── Background overlay modes ──────────────────────────── */
+  
+  /* Transparent children mode - hides inner card backgrounds */
+  .bg-overlay-transparent-children ha-card {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .bg-overlay-transparent-children ha-card::before,
+  .bg-overlay-transparent-children ha-card::after {
+    display: none !important;
+  }
+
+  /* Ensure text remains visible on backgrounds */
+  .bg-overlay-transparent-children ha-card * {
+    background: transparent !important;
+  }
 `;
 
 
