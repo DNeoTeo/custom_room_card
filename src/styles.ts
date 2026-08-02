@@ -4,7 +4,6 @@ import { css } from "lit";
 
 export const cardStyles = css`
   :host {
-    --room-card-bg: var(--ha-card-background, var(--card-background-color, #fff));
     --room-card-radius: var(--ha-card-border-radius, 12px);
     --room-card-shadow: var(--ha-card-box-shadow, 0 2px 6px rgba(0, 0, 0, 0.15));
     --btn-size: 60px;
@@ -13,7 +12,6 @@ export const cardStyles = css`
     --btn-icon-color: var(--primary-text-color, #212121);
     --btn-icon-active: var(--primary-color, #2196f3);
     --btn-label-color: var(--secondary-text-color, #727272);
-    --btn-label-size: 10px;
     --btn-label-font: system-ui;
     /* Global font family for all text */
     --global-font-family: system-ui;
@@ -37,34 +35,14 @@ export const cardStyles = css`
     overflow: hidden;
     border-radius: var(--room-card-radius);
     box-shadow: var(--room-card-shadow);
-    background: var(--room-card-bg);
   }
 
   /* ── Room container ──────────────────────────────────── */
   .room-container {
     position: relative;
     width: 100%;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
-  }
-
-  .room-container.aspect-ratio {
-    height: 0;
-  }
-
-  .room-container.fixed-height {
-    height: var(--card-height, 300px);
-  }
-
-  /* ── Background ──────────────────────────────────────── */
-  .room-bg {
-    position: absolute;
-    inset: 0;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    z-index: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
   }
 
   /* ── Content layer ───────────────────────────────────── */
@@ -170,31 +148,6 @@ export const cardStyles = css`
   }
 
   .nested-card-wrapper > * {
-    width: 100%;
-    height: 100%;
-  }
-
-  .nested-card-wrapper.no-border > ha-card,
-  .nested-card-wrapper.no-border > * {
-    box-shadow: none !important;
-    border: none !important;
-    background: transparent !important;
-  }
-
-  /* ── Custom YAML card wrapper ──────────────────────────── */
-  .custom-yaml-card-wrapper {
-    position: absolute;
-    z-index: 1;
-    overflow: hidden;
-    border-radius: var(--ha-card-border-radius, 12px);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 220px;
-    height: auto;
-  }
-
-  .custom-yaml-card-wrapper > * {
     width: 100%;
     height: 100%;
   }
@@ -321,7 +274,7 @@ export const editorStyles = css`
 
   .add-btn,
   .remove-btn,
-  .upload-btn {
+  .cancel-btn {
     cursor: pointer;
     border: none;
     border-radius: 50%;
@@ -343,19 +296,12 @@ export const editorStyles = css`
     opacity: 0.85;
   }
 
-  .upload-btn {
-    background: var(--primary-color);
-    color: white;
-    margin-left: 4px;
-    flex-shrink: 0;
-  }
-
-  .upload-btn:hover {
-    opacity: 0.85;
-  }
-
-  .upload-btn ha-icon {
-    --mdc-icon-size: 18px;
+  .cancel-btn {
+    width: auto;
+    border-radius: 6px;
+    padding: 0 12px;
+    color: var(--primary-text-color);
+    background: var(--secondary-background-color, #f5f5f5);
   }
 
   .remove-btn {
@@ -377,6 +323,30 @@ export const editorStyles = css`
   .entity-extra-row ha-textfield {
     flex: 1;
     min-width: 0;
+  }
+
+  .entity-extra-row ha-icon-picker {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .color-picker {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    margin-top: 10px;
+    padding: 2px;
+    cursor: pointer;
+    border: 1px solid var(--divider-color, #ddd);
+    border-radius: 6px;
+    background: var(--card-background-color, white);
+  }
+
+  .native-layout-info {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--secondary-text-color);
   }
 
   .preview-box {
@@ -460,53 +430,16 @@ export const editorStyles = css`
     color: var(--primary-text-color);
   }
 
-  .type-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-
-  .type-chip {
-    cursor: pointer;
+  .card-picker {
+    margin: 8px 0;
+    padding: 12px;
     border: 1px solid var(--divider-color, #ddd);
-    border-radius: 16px;
-    padding: 3px 10px;
-    font-size: 11px;
-    background: var(--card-background-color, white);
-    color: var(--primary-text-color);
-    transition: all 0.15s;
+    border-radius: 8px;
   }
 
-  .type-chip:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
-
-  .type-chip.active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-  }
-
-  .yaml-editor {
-    width: 100%;
-    min-height: 80px;
-    font-family: 'Roboto Mono', 'Consolas', monospace;
-    font-size: 12px;
-    padding: 8px;
-    border: 1px solid var(--divider-color, #ddd);
-    border-radius: 6px;
-    background: var(--card-background-color, white);
-    color: var(--primary-text-color);
-    resize: vertical;
-    box-sizing: border-box;
-    line-height: 1.5;
-  }
-
-  .yaml-editor:focus {
-    outline: none;
-    border-color: var(--primary-color);
+  hui-card-element-editor,
+  hui-card-picker {
+    display: block;
   }
 
   .advanced-options {
@@ -538,112 +471,4 @@ export const editorStyles = css`
     accent-color: var(--primary-color);
   }
 
-  /* ── Responsive info box ──────────────────────────────── */
-  .responsive-info {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    background: rgba(var(--rgb-primary-color, 33, 150, 243), 0.08);
-    border: 1px solid rgba(var(--rgb-primary-color, 33, 150, 243), 0.25);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 12px;
-    color: var(--secondary-text-color);
-    line-height: 1.5;
-    margin-top: 4px;
-  }
-
-  .responsive-info ha-icon {
-    --mdc-icon-size: 18px;
-    color: var(--primary-color);
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .responsive-info strong {
-    color: var(--primary-text-color);
-  }
-
-  /* ── Custom YAML cards editor ──────────────────────────── */
-  .custom-yaml-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-
-  .yaml-card-row {
-    background: var(--secondary-background-color, #f5f5f5);
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid var(--primary-color);
-    position: relative;
-  }
-
-  .yaml-card-row .form-row {
-    position: relative;
-  }
-
-  .yaml-card-row .remove-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: transparent;
-    color: var(--error-color, #db4437);
-    margin: 0;
-  }
-
-  .yaml-editor {
-    width: 100%;
-    font-family: 'Roboto Mono', 'Courier New', monospace;
-    font-size: 12px;
-    padding: 10px;
-    border: 1px solid var(--divider-color, #ddd);
-    border-radius: 6px;
-    background: var(--card-background-color, white);
-    color: var(--primary-text-color);
-    resize: vertical;
-    box-sizing: border-box;
-    line-height: 1.5;
-  }
-
-  .yaml-editor:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(var(--rgb-primary-color, 33, 150, 243), 0.1);
-  }
-
-  /* ── Custom YAML card wrappers ────────────────────────── */
-  .custom-yaml-card-wrapper {
-    position: absolute;
-    z-index: 1;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: auto;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* ── Background overlay modes ──────────────────────────── */
-  
-  /* Transparent children mode - hides inner card backgrounds */
-  .bg-overlay-transparent-children ha-card {
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  .bg-overlay-transparent-children ha-card::before,
-  .bg-overlay-transparent-children ha-card::after {
-    display: none !important;
-  }
-
-  /* Ensure text remains visible on backgrounds */
-  .bg-overlay-transparent-children ha-card * {
-    background: transparent !important;
-  }
 `;
-
-

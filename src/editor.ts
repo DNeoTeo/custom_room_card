@@ -2,13 +2,10 @@
  * custom-room-card-editor – Visual configuration editor.
  *
  * Provides a comprehensive GUI for editing:
- * - General card settings (title, global font, aspect ratio)
+ * - General card settings (title and global font)
  * - Text styling (title, button labels, entity state)
- * - Background images and colors with positioning/opacity control
- * - Entity button positioning, sizing, icons, labels, and backgrounds
- * - Nested card configuration with YAML editor and background customization
- * - Background overlay modes (normal or transparent-children)
- * - Custom YAML card support with full YAML textarea editing
+ * - Entity button positioning, sizing, icons, and labels
+ * - Nested card selection and configuration through Home Assistant's native UI
  * - Live position preview with drag indicators
  */
 
@@ -27,6 +24,7 @@ import {
 } from "./types";
 import { editorStyles } from "./styles";
 import { deepClone } from "./helpers";
+import { AVAILABLE_FONTS } from "./fonts";
 
 const EDITOR_TAG = "custom-room-card-editor";
 
@@ -35,7 +33,9 @@ export class CustomRoomCardEditor extends LitElement {
   static styles = editorStyles;
 
   @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public lovelace?: unknown;
   @state() private _config!: CustomRoomCardConfig;
+  @state() private _showNestedCardPicker = false;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -56,14 +56,10 @@ export class CustomRoomCardEditor extends LitElement {
         ${this._renderGeneralSection()}
         <!-- Text styling section -->
         ${this._renderTextStyleSection()}
-        <!-- Background settings -->
-        ${this._renderBackgroundSection()}
         <!-- Entity buttons -->
         ${this._renderEntitiesSection()}
         <!-- Nested cards -->
         ${this._renderNestedCardsSection()}
-        <!-- Custom YAML cards -->
-        ${this._renderCustomYamlCardsSection()}
         <!-- Position preview -->
         ${this._renderPreview()}
       </div>
@@ -86,52 +82,20 @@ export class CustomRoomCardEditor extends LitElement {
             @input=${(ev: InputEvent) =>
               this._updateConfig("title", (ev.target as HTMLInputElement).value)}
           ></ha-textfield>
-          <ha-textfield
+          <ha-select
             label="Global Font Family"
             .value=${this._config.global_font_family ?? "system-ui"}
-            placeholder="e.g. Arial, Helvetica, serif, monospace"
-            @input=${(ev: InputEvent) =>
-              this._updateConfig("global_font_family", (ev.target as HTMLInputElement).value || "system-ui")}
-          ></ha-textfield>
+            @value-changed=${(ev: CustomEvent) =>
+              this._updateConfig("global_font_family", ev.detail.value || "system-ui")}
+          >
+            ${AVAILABLE_FONTS.map(
+              (font) => html`<mwc-list-item value=${font.value}>${font.label}</mwc-list-item>`
+            )}
+          </ha-select>
         </div>
-        <div class="form-row">
-          <ha-textfield
-            label="Aspect Ratio (e.g. 16/9)"
-            .value=${this._config.aspect_ratio ?? "16/9"}
-            @input=${(ev: InputEvent) =>
-              this._updateConfig("aspect_ratio", (ev.target as HTMLInputElement).value)}
-          ></ha-textfield>
-          <ha-textfield
-            label="Card Height (px, overrides ratio)"
-            type="number"
-            .value=${this._config.card_height?.toString() ?? ""}
-            @input=${(ev: InputEvent) => {
-              const v = (ev.target as HTMLInputElement).value;
-              this._updateConfig("card_height", v ? Number(v) : undefined);
-            }}
-          ></ha-textfield>
-        </div>
-        <div class="form-row">
-          <ha-textfield
-            label="Design Width (px)"
-            type="number"
-            min="100"
-            max="2000"
-            .value=${this._config.design_width?.toString() ?? "600"}
-            @input=${(ev: InputEvent) => {
-              const v = (ev.target as HTMLInputElement).value;
-              this._updateConfig("design_width", v ? Number(v) : 600);
-            }}
-          ></ha-textfield>
-        </div>
-        <div class="responsive-info">
-          <ha-icon icon="mdi:responsive"></ha-icon>
-          <span>
-            Responsive scaling active: entity buttons and nested cards scale
-            proportionally to the card width relative to the design width
-            (<strong>${this._config.design_width ?? 600}px</strong>).
-          </span>
-        </div>
+        <p class="native-layout-info">
+          La largeur et la hauteur de la carte sont gérées par Home Assistant. Le canevas s'adapte automatiquement pour le placement des éléments.
+        </p>
       </div>
     `;
   }
@@ -169,6 +133,14 @@ export class CustomRoomCardEditor extends LitElement {
               @input=${(ev: InputEvent) =>
                 this._updateTextStyle("title_style", "text_color", (ev.target as HTMLInputElement).value || undefined)}
             ></ha-textfield>
+            <input
+              class="color-picker"
+              type="color"
+              aria-label="Pick title color"
+              .value=${this._colorPickerValue(titleStyle.text_color)}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("title_style", "text_color", (ev.target as HTMLInputElement).value)}
+            />
           </div>
         </div>
 
@@ -185,6 +157,14 @@ export class CustomRoomCardEditor extends LitElement {
                 this._updateTextStyle("button_label_style", "font_size", v ? Number(v) : undefined);
               }}
             ></ha-textfield>
+            <input
+              class="color-picker"
+              type="color"
+              aria-label="Pick button label color"
+              .value=${this._colorPickerValue(labelStyle.text_color)}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("button_label_style", "text_color", (ev.target as HTMLInputElement).value)}
+            />
             <ha-textfield
               label="Text Color"
               .value=${labelStyle.text_color ?? ""}
@@ -213,71 +193,15 @@ export class CustomRoomCardEditor extends LitElement {
               @input=${(ev: InputEvent) =>
                 this._updateTextStyle("button_state_style", "text_color", (ev.target as HTMLInputElement).value || undefined)}
             ></ha-textfield>
+            <input
+              class="color-picker"
+              type="color"
+              aria-label="Pick button state color"
+              .value=${this._colorPickerValue(stateStyle.text_color)}
+              @input=${(ev: InputEvent) =>
+                this._updateTextStyle("button_state_style", "text_color", (ev.target as HTMLInputElement).value)}
+            />
           </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // ── Background section ─────────────────────────────────────────────────────
-
-  private _renderBackgroundSection(): TemplateResult {
-    return html`
-      <div class="editor-section">
-        <div class="section-title">
-          <ha-icon icon="mdi:image"></ha-icon>
-          Background
-        </div>
-        <div class="form-row">
-          <ha-textfield
-            label="Image Path (/local/... or https://...)"
-            placeholder="/local/my_image.jpg"
-            .value=${this._config.background_image ?? ""}
-            @input=${(ev: InputEvent) =>
-              this._updateConfig("background_image", (ev.target as HTMLInputElement).value)}
-          ></ha-textfield>
-          <button 
-            class="upload-btn" 
-            @click=${() => this._openImagePathDialog()}
-            title="Browse or enter path"
-          >
-            <ha-icon icon="mdi:folder-open"></ha-icon>
-          </button>
-        </div>
-        <p style="font-size: 0.85em; color: var(--secondary-text-color); margin: 8px 0;">
-          <strong>Note:</strong> Upload images to /config/www/ in Home Assistant, then reference them as /local/filename.jpg
-        </p>
-        <div class="form-row">
-          <ha-textfield
-            label="Background Color"
-            .value=${this._config.background_color ?? ""}
-            @input=${(ev: InputEvent) =>
-              this._updateConfig("background_color", (ev.target as HTMLInputElement).value)}
-          ></ha-textfield>
-          <ha-textfield
-            label="Opacity (0-1)"
-            type="number"
-            min="0"
-            max="1"
-            step="0.1"
-            .value=${this._config.background_opacity?.toString() ?? "1"}
-            @input=${(ev: InputEvent) =>
-              this._updateConfig("background_opacity", Number((ev.target as HTMLInputElement).value))}
-          ></ha-textfield>
-        </div>
-        <div class="form-row">
-          <ha-textfield
-            label="Size (cover, contain, 100%)"
-            .value=${this._config.background_size ?? "cover"}
-            @input=${(ev: InputEvent) =>
-              this._updateConfig("background_size", (ev.target as HTMLInputElement).value)}
-          ></ha-textfield>
-          <ha-textfield
-            label="Position (center, top left…)"
-            .value=${this._config.background_position ?? "center"}
-            @input=${(ev: InputEvent) =>
-              this._updateConfig("background_position", (ev.target as HTMLInputElement).value)}
-          ></ha-textfield>
         </div>
       </div>
     `;
@@ -350,12 +274,12 @@ export class CustomRoomCardEditor extends LitElement {
         </div>
 
         <div class="entity-extra-row">
-          <ha-textfield
+          <ha-icon-picker
             label="Icon"
             .value=${entity.icon ?? ""}
-            @input=${(ev: InputEvent) =>
-              this._updateEntity(index, "icon", (ev.target as HTMLInputElement).value || undefined)}
-          ></ha-textfield>
+            @value-changed=${(ev: CustomEvent) =>
+              this._updateEntity(index, "icon", ev.detail.value || undefined)}
+          ></ha-icon-picker>
 
           <ha-textfield
             label="Label"
@@ -393,51 +317,11 @@ export class CustomRoomCardEditor extends LitElement {
           ></ha-textfield>
         </div>
 
-        <!-- Button background styling -->
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--divider-color, #e0e0e0);">
-          <label style="display: block; font-size: 0.85em; color: var(--secondary-text-color); margin-bottom: 8px;">
-            Button Background
-          </label>
-          <div class="entity-extra-row">
-            <ha-textfield
-              label="Background Color"
-              .value=${entity.button_background_color ?? ""}
-              @input=${(ev: InputEvent) =>
-                this._updateEntity(index, "button_background_color", (ev.target as HTMLInputElement).value || undefined)}
-            ></ha-textfield>
-          </div>
-          <div class="entity-extra-row">
-            <ha-textfield
-              label="Background Image URL"
-              placeholder="/local/image.jpg or https://..."
-              .value=${entity.button_background_image ?? ""}
-              @input=${(ev: InputEvent) =>
-                this._updateEntity(index, "button_background_image", (ev.target as HTMLInputElement).value || undefined)}
-            ></ha-textfield>
-          </div>
-          <div class="entity-extra-row">
-            <ha-select
-              label="Background Mode"
-              .value=${entity.background_overlay_mode ?? "normal"}
-              @value-changed=${(ev: CustomEvent) =>
-                this._updateEntity(index, "background_overlay_mode", ev.detail.value)}
-            >
-              <mwc-list-item value="normal">Normal</mwc-list-item>
-              <mwc-list-item value="transparent-children">Transparent Children</mwc-list-item>
-            </ha-select>
-          </div>
-        </div>
       </div>
     `;
   }
 
   // ── Nested cards section ────────────────────────────────────────────────────
-
-  /** Known built-in HA card types for the dropdown */
-  // Available card types for reference:
-  // button, entities, entity, gauge, glance, history-graph, light, map,
-  // markdown, media-control, picture, sensor, thermostat, weather-forecast,
-  // tile, mushroom-entity-card, custom:button-card, etc.
 
   private _renderNestedCardsSection(): TemplateResult {
     const nestedCards = this._config.nested_cards ?? [];
@@ -453,7 +337,22 @@ export class CustomRoomCardEditor extends LitElement {
           ${nestedCards.map((nc, i) => this._renderNestedCardRow(nc, i))}
         </div>
 
-        <button class="add-btn" @click=${this._addNestedCard} title="Add nested card">
+        ${this._showNestedCardPicker
+          ? html`
+              <div class="card-picker">
+                <hui-card-picker
+                  .hass=${this.hass}
+                  .lovelace=${this.lovelace ?? { views: [] }}
+                  @config-changed=${this._addNestedCardFromPicker}
+                ></hui-card-picker>
+                <button class="cancel-btn" @click=${() => (this._showNestedCardPicker = false)}>
+                  Cancel
+                </button>
+              </div>
+            `
+          : nothing}
+
+        <button class="add-btn" @click=${() => (this._showNestedCardPicker = true)} title="Add nested card">
           <ha-icon icon="mdi:plus"></ha-icon>
         </button>
       </div>
@@ -465,7 +364,6 @@ export class CustomRoomCardEditor extends LitElement {
     index: number
   ): TemplateResult {
     const cardType = nc.card?.type ?? "";
-    const yamlConfig = this._cardConfigToYaml(nc.card);
 
     return html`
       <div class="nested-card-row">
@@ -483,57 +381,13 @@ export class CustomRoomCardEditor extends LitElement {
           </button>
         </div>
 
-        <div class="form-row">
-          <ha-textfield
-            label="Label (editor only)"
-            .value=${nc.label ?? ""}
-            @input=${(ev: InputEvent) =>
-              this._updateNestedCard(index, "label", (ev.target as HTMLInputElement).value || undefined)}
-          ></ha-textfield>
-        </div>
-
-        <!-- Card type selector -->
-        <div class="form-row">
-          <ha-textfield
-            label="Card Type (e.g. button, sensor, custom:button-card)"
-            .value=${cardType}
-            @input=${(ev: InputEvent) => {
-              const newType = (ev.target as HTMLInputElement).value;
-              const newCard = { ...nc.card, type: newType };
-              this._updateNestedCard(index, "card", newCard);
-            }}
-          ></ha-textfield>
-        </div>
-
-        <!-- Quick type chips -->
-        <div class="type-chips">
-          ${["button", "sensor", "gauge", "tile", "entity", "thermostat", "weather-forecast", "markdown"].map(
-            (t) => html`
-              <button
-                class="type-chip ${cardType === t ? "active" : ""}"
-                @click=${() => {
-                  const newCard = { ...nc.card, type: t };
-                  this._updateNestedCard(index, "card", newCard);
-                }}
-              >${t}</button>
-            `
-          )}
-        </div>
-
-        <!-- Card YAML configuration -->
-        <div class="form-row">
-          <textarea
-            class="yaml-editor"
-            rows="5"
-            placeholder="Card YAML config (without 'type:')&#10;e.g.:&#10;entity: sensor.temperature&#10;name: My Sensor"
-            .value=${yamlConfig}
-            @change=${(ev: Event) => {
-              const yaml = (ev.target as HTMLTextAreaElement).value;
-              const parsed = this._yamlToCardConfig(yaml, cardType);
-              this._updateNestedCard(index, "card", parsed);
-            }}
-          ></textarea>
-        </div>
+        <hui-card-element-editor
+          .hass=${this.hass}
+          .lovelace=${this.lovelace ?? { views: [] }}
+          .value=${nc.card}
+          @config-changed=${(ev: CustomEvent) =>
+            this._updateNestedCard(index, "card", ev.detail.config as LovelaceCardConfig)}
+        ></hui-card-element-editor>
 
         <!-- Position & Size -->
         <div class="form-row">
@@ -588,119 +442,7 @@ export class CustomRoomCardEditor extends LitElement {
             ></ha-textfield>
           </div>
 
-          <!-- Background styling for nested card -->
-          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--divider-color, #e0e0e0);">
-            <label style="display: block; font-size: 0.85em; color: var(--secondary-text-color); margin-bottom: 8px;">
-              Background
-            </label>
-            <div class="form-row">
-              <ha-textfield
-                label="Background Color"
-                placeholder="#ffffff or rgba(...)"
-                .value=${nc.background_color ?? ""}
-                @input=${(ev: InputEvent) =>
-                  this._updateNestedCard(index, "background_color", (ev.target as HTMLInputElement).value || undefined)}
-              ></ha-textfield>
-              <ha-textfield
-                label="Opacity (0-1)"
-                type="number"
-                min="0"
-                max="1"
-                step="0.1"
-                .value=${nc.background_opacity?.toString() ?? "1"}
-                @input=${(ev: InputEvent) =>
-                  this._updateNestedCard(index, "background_opacity", Number((ev.target as HTMLInputElement).value))}
-              ></ha-textfield>
-            </div>
-            <div class="form-row">
-              <ha-textfield
-                label="Background Image"
-                placeholder="/local/image.jpg or https://..."
-                .value=${nc.background_image ?? ""}
-                @input=${(ev: InputEvent) =>
-                  this._updateNestedCard(index, "background_image", (ev.target as HTMLInputElement).value || undefined)}
-              ></ha-textfield>
-            </div>
-            <div class="form-row">
-              <ha-textfield
-                label="Size (cover, contain, 100%)"
-                .value=${nc.background_size ?? "cover"}
-                @input=${(ev: InputEvent) =>
-                  this._updateNestedCard(index, "background_size", (ev.target as HTMLInputElement).value || "cover")}
-              ></ha-textfield>
-              <ha-textfield
-                label="Position (center, top left…)"
-                .value=${nc.background_position ?? "center"}
-                @input=${(ev: InputEvent) =>
-                  this._updateNestedCard(index, "background_position", (ev.target as HTMLInputElement).value || "center")}
-              ></ha-textfield>
-            </div>
-            <div class="form-row">
-              <ha-select
-                label="Background Mode"
-                .value=${nc.background_overlay_mode ?? "normal"}
-                @value-changed=${(ev: CustomEvent) =>
-                  this._updateNestedCard(index, "background_overlay_mode", ev.detail.value)}
-              >
-                <mwc-list-item value="normal">Normal (background + card content)</mwc-list-item>
-                <mwc-list-item value="transparent-children">Transparent Children (hide child cards)</mwc-list-item>
-              </ha-select>
-            </div>
-          </div>
         </details>
-      </div>
-    `;
-  }
-
-  // ── Custom YAML cards section ──────────────────────────────────────────────
-
-  private _renderCustomYamlCardsSection(): TemplateResult {
-    const customYamlCards = this._config.custom_yaml_cards ?? [];
-
-    return html`
-      <div class="editor-section">
-        <div class="section-title">
-          <ha-icon icon="mdi:code-json"></ha-icon>
-          Custom YAML Cards
-        </div>
-
-        <p style="font-size: 0.9em; color: var(--secondary-text-color); margin-bottom: 12px;">
-          Add custom Lovelace cards by pasting YAML configuration. Each card will be positioned and displayed independently.
-        </p>
-
-        <div class="custom-yaml-list">
-          ${customYamlCards.map((yaml, i) => this._renderCustomYamlRow(yaml, i))}
-        </div>
-
-        <button class="add-btn" @click=${this._addCustomYamlCard} title="Add custom YAML card">
-          <ha-icon icon="mdi:plus"></ha-icon>
-        </button>
-      </div>
-    `;
-  }
-
-  private _renderCustomYamlRow(yaml: string, index: number): TemplateResult {
-    return html`
-      <div class="yaml-card-row">
-        <div class="form-row">
-          <textarea
-            class="yaml-editor"
-            rows="6"
-            placeholder="Paste your Lovelace card YAML here&#10;e.g.:&#10;type: custom:mushroom-template-card&#10;entity: light.living_room&#10;primary: Living Room Light"
-            .value=${yaml}
-            @change=${(ev: Event) => {
-              const val = (ev.target as HTMLTextAreaElement).value;
-              this._updateCustomYamlCard(index, val);
-            }}
-          ></textarea>
-          <button
-            class="remove-btn"
-            @click=${() => this._removeCustomYamlCard(index)}
-            title="Remove"
-          >
-            <ha-icon icon="mdi:close"></ha-icon>
-          </button>
-        </div>
       </div>
     `;
   }
@@ -712,27 +454,13 @@ export class CustomRoomCardEditor extends LitElement {
     const nestedCards = this._config.nested_cards ?? [];
     if (entities.length === 0 && nestedCards.length === 0) return html`${nothing}`;
 
-    const bgStyle: Record<string, string> = {};
-    if (this._config.background_image) {
-      bgStyle["background-image"] = `url('${this._config.background_image}')`;
-      bgStyle["background-size"] = this._config.background_size ?? "cover";
-      bgStyle["background-position"] = this._config.background_position ?? "center";
-      bgStyle["background-repeat"] = "no-repeat";
-      if (this._config.background_opacity !== undefined) {
-        bgStyle["opacity"] = String(this._config.background_opacity);
-      }
-    }
-    if (this._config.background_color) {
-      bgStyle["background-color"] = this._config.background_color;
-    }
-
     return html`
       <div class="editor-section">
         <div class="section-title">
           <ha-icon icon="mdi:map-marker"></ha-icon>
           Position Preview
         </div>
-        <div class="preview-box" style=${styleMap(bgStyle)}
+        <div class="preview-box"
              @click=${(ev: MouseEvent) => this._onPreviewClick(ev)}>
           <!-- Entity dots (blue) -->
           ${entities.map(
@@ -819,17 +547,24 @@ export class CustomRoomCardEditor extends LitElement {
     this._updateConfig(styleKey, isEmptyStyle ? undefined : currentStyle);
   }
 
+  private _colorPickerValue(value: string | undefined): string {
+    return /^#[0-9a-f]{6}$/i.test(value ?? "") ? value! : "#000000";
+  }
+
   // ── Nested card handlers ───────────────────────────────────────────────────
 
-  private _addNestedCard(): void {
+  private _addNestedCardFromPicker(ev: CustomEvent<{ config?: LovelaceCardConfig }>): void {
+    const card = ev.detail?.config;
+    if (!card?.type) return;
     const nestedCards = [...(this._config.nested_cards ?? [])];
     nestedCards.push({
-      card: { type: "button" },
+      card,
       left: DEFAULT_NESTED_CARD.left!,
       top: DEFAULT_NESTED_CARD.top!,
       width: DEFAULT_NESTED_CARD.width,
       height: DEFAULT_NESTED_CARD.height,
     });
+    this._showNestedCardPicker = false;
     this._updateConfig("nested_cards", nestedCards);
   }
 
@@ -848,122 +583,6 @@ export class CustomRoomCardEditor extends LitElement {
     if (!nestedCards[index]) return;
     (nestedCards[index] as any)[key] = value;
     this._updateConfig("nested_cards", nestedCards);
-  }
-
-  // ── Image path dialog handler ──────────────────────────────────────────────
-
-  private _openImagePathDialog(): void {
-    // Placeholder for future enhancement
-    // Users should manually enter /local/filename.jpg paths in the text field
-  }
-
-  // ── Custom YAML cards handlers ─────────────────────────────────────────────
-
-  private _addCustomYamlCard(): void {
-    const customYamlCards = [...(this._config.custom_yaml_cards ?? [])];
-    customYamlCards.push("");
-    this._updateConfig("custom_yaml_cards", customYamlCards);
-  }
-
-  private _removeCustomYamlCard(index: number): void {
-    const customYamlCards = [...(this._config.custom_yaml_cards ?? [])];
-    customYamlCards.splice(index, 1);
-    this._updateConfig("custom_yaml_cards", customYamlCards);
-  }
-
-  private _updateCustomYamlCard(index: number, yaml: string): void {
-    const customYamlCards = [...(this._config.custom_yaml_cards ?? [])];
-    if (!customYamlCards[index]) return;
-    customYamlCards[index] = yaml;
-    this._updateConfig("custom_yaml_cards", customYamlCards);
-  }
-
-  // ── YAML helpers ───────────────────────────────────────────────────────────
-
-  /**
-   * Converts a card config object (minus `type`) to a simple YAML-like string.
-   * Only handles flat key:value and simple nested objects.
-   */
-  private _cardConfigToYaml(cardConfig: LovelaceCardConfig | undefined): string {
-    if (!cardConfig) return "";
-    const lines: string[] = [];
-    for (const [key, value] of Object.entries(cardConfig)) {
-      if (key === "type") continue;
-      if (value === undefined || value === null) continue;
-      if (typeof value === "object" && !Array.isArray(value)) {
-        lines.push(`${key}:`);
-        for (const [k2, v2] of Object.entries(value as Record<string, unknown>)) {
-          lines.push(`  ${k2}: ${JSON.stringify(v2)}`);
-        }
-      } else if (Array.isArray(value)) {
-        lines.push(`${key}: ${JSON.stringify(value)}`);
-      } else {
-        lines.push(`${key}: ${value}`);
-      }
-    }
-    return lines.join("\n");
-  }
-
-  /**
-   * Parses a simple YAML-like string back into a card config object.
-   * Handles flat key: value pairs. For complex configs, falls back to JSON.
-   */
-  private _yamlToCardConfig(yaml: string, cardType: string): LovelaceCardConfig {
-    const config: Record<string, unknown> = { type: cardType };
-    const lines = yaml.split("\n");
-    let currentObj: Record<string, unknown> | null = null;
-    let currentKey = "";
-
-    for (const line of lines) {
-      const trimmed = line.trimEnd();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-
-      // Indented line = sub-property
-      if (trimmed.startsWith("  ") && currentObj !== null) {
-        const match = trimmed.trim().match(/^([^:]+):\s*(.*)$/);
-        if (match) {
-          currentObj[match[1].trim()] = this._parseYamlValue(match[2].trim());
-        }
-        continue;
-      }
-
-      // Top-level line
-      const match = trimmed.match(/^([^:]+):\s*(.*)$/);
-      if (match) {
-        const key = match[1].trim();
-        const val = match[2].trim();
-        if (key === "type") continue; // Ignore type in YAML
-
-        if (val === "" || val === undefined) {
-          // Start of nested object
-          currentKey = key;
-          currentObj = {};
-          config[currentKey] = currentObj;
-        } else {
-          currentObj = null;
-          config[key] = this._parseYamlValue(val);
-        }
-      }
-    }
-
-    return config as LovelaceCardConfig;
-  }
-
-  private _parseYamlValue(val: string): unknown {
-    if (val === "true") return true;
-    if (val === "false") return false;
-    if (val === "null" || val === "~") return null;
-    // Try JSON (for arrays/objects)
-    if (val.startsWith("[") || val.startsWith("{")) {
-      try { return JSON.parse(val); } catch { /* fallback */ }
-    }
-    // Number
-    if (/^-?\d+(\.\d+)?$/.test(val)) return Number(val);
-    // Strip quotes
-    if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
-      return val.slice(1, -1);
-    }
-    return val;
   }
 
   private _updateConfig(key: string, value: unknown): void {

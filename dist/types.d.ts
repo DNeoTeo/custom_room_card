@@ -68,12 +68,6 @@ export interface EntityButtonConfig {
     tap_action?: ActionConfig;
     /** Custom hold action */
     hold_action?: ActionConfig;
-    /** Button background color or image */
-    button_background_color?: string;
-    /** Button background image URL */
-    button_background_image?: string;
-    /** Background overlay mode: 'normal' (default) or 'transparent-children' (hide child backgrounds) */
-    background_overlay_mode?: "normal" | "transparent-children";
     /** Custom CSS styles for this button */
     styles?: Record<string, string>;
 }
@@ -101,18 +95,6 @@ export interface NestedCardConfig {
     z_index?: number;
     /** CSS border-radius override */
     border_radius?: string;
-    /** Background color */
-    background_color?: string;
-    /** Background image URL or /local/ path */
-    background_image?: string;
-    /** Background opacity (0-1) */
-    background_opacity?: number;
-    /** Background size (cover, contain, etc) */
-    background_size?: string;
-    /** Background position (center, top left, etc) */
-    background_position?: string;
-    /** Background overlay mode: 'normal' (default) or 'transparent-children' (hide child backgrounds) */
-    background_overlay_mode?: "normal" | "transparent-children";
     /** Custom CSS styles applied to the wrapper */
     styles?: Record<string, string>;
 }
@@ -121,16 +103,6 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
     type: string;
     /** Card title */
     title?: string;
-    /** Background image URL or /local/ path */
-    background_image?: string;
-    /** Background color (CSS) */
-    background_color?: string;
-    /** Background size (CSS background-size) */
-    background_size?: string;
-    /** Background position (CSS background-position) */
-    background_position?: string;
-    /** Background opacity (0-1) */
-    background_opacity?: number;
     /** Global font family for all text in the card */
     global_font_family?: string;
     /** Title text styling */
@@ -139,30 +111,17 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
     button_label_style?: TextStyleConfig;
     /** Entity button state text styling */
     button_state_style?: TextStyleConfig;
-    /** Card aspect ratio (e.g. "16/9", "4/3", "1/1") */
-    aspect_ratio?: string;
-    /** Card height in px (overrides aspect_ratio if set) */
-    card_height?: number;
-    /**
-     * Reference / design width in px (default: 600).
-     * Used to compute the responsive scale factor.
-     * All pixel-based sizes (entity buttons, nested cards, icons, labels)
-     * are scaled proportionally: scale = actualCardWidth / design_width.
-     */
-    design_width?: number;
     /** Entity buttons */
     entities?: EntityButtonConfig[];
     /** Nested Lovelace cards */
     nested_cards?: NestedCardConfig[];
-    /** Custom YAML cards (as raw YAML strings) */
-    custom_yaml_cards?: string[];
     /** Show room title overlay */
     show_title?: boolean;
     /** Custom CSS for the whole card */
     card_styles?: Record<string, string>;
 }
 export declare const CARD_NAME = "custom-room-card";
-export declare const CARD_DESCRIPTION = "Adaptive room layout card with positioned entity buttons and custom backgrounds.";
+export declare const CARD_DESCRIPTION = "Adaptive room layout card with positioned entity buttons and nested Lovelace cards.";
 export declare const CARD_VERSION = "1.0.0";
 export declare const DOMAIN_ICONS: Record<string, string>;
 export declare const DEFAULT_ENTITY_BUTTON: Partial<EntityButtonConfig>;

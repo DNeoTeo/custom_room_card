@@ -2,10 +2,8 @@
  * custom-room-card – Main Lovelace card element.
  *
  * An adaptive room layout card with:
- * - Freely-positioned entity buttons with custom backgrounds and overlay modes
- * - Customizable card background (color, image, opacity)
- * - Nested Lovelace cards with full background styling
- * - Custom YAML cards for advanced configurations
+ * - Freely-positioned entity buttons
+ * - Nested Lovelace cards configured with Home Assistant's native editor
  * - Global font family and text styling (title, labels, state)
  * - Responsive design with automatic scaling
  * - Drag-and-drop positioning preview in editor
@@ -36,11 +34,7 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     protected render(): TemplateResult;
     private _renderEntityButton;
     private _renderNestedCard;
-    private _renderCustomYamlCard;
     private _createNestedCards;
-    private _createCustomYamlCards;
-    private _parseYamlToConfig;
-    private _parseYamlValue;
     private _createCardElement;
     private _onPointerDown;
     private _onPointerUp;
@@ -56,7 +50,6 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
      * Percentage and 'auto' values are returned unchanged.
      */
     private _scaleCssSize;
-    private _aspectRatioPadding;
 }
 declare global {
     interface HTMLElementTagNameMap {

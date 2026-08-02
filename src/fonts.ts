@@ -1,8 +1,7 @@
 /**
  * Font and media browser helpers for custom-room-card.
  *
- * NOTE: Font selection is now handled via global_font_family (text field input).
- * The AVAILABLE_FONTS list is maintained for reference and future UI features.
+ * The font list is used by the Home Assistant native select in the editor.
  * Media browser functions can be used for image/media file browsing if needed.
  */
 
@@ -13,8 +12,11 @@ import { HomeAssistant } from "./types";
 export const AVAILABLE_FONTS = [
   // System fonts (widely supported)
   { label: "System Default", value: "system-ui" },
+  { label: "Roboto (Home Assistant)", value: "Roboto, sans-serif" },
   { label: "Arial", value: "Arial, sans-serif" },
-  { label: "Helvetica", value: "Helvetica, Arena, sans-serif" },
+  { label: "Helvetica", value: "Helvetica, Arial, sans-serif" },
+  { label: "Segoe UI", value: "'Segoe UI', sans-serif" },
+  { label: "Tahoma", value: "Tahoma, sans-serif" },
   { label: "Times New Roman", value: '"Times New Roman", serif' },
   { label: "Courier New", value: '"Courier New", monospace' },
   { label: "Comic Sans MS", value: '"Comic Sans MS", cursive' },
@@ -23,6 +25,7 @@ export const AVAILABLE_FONTS = [
   { label: "Garamond", value: "Garamond, serif" },
   { label: "Trebuchet MS", value: '"Trebuchet MS", sans-serif' },
   { label: "Verdana", value: "Verdana, Geneva, sans-serif" },
+  { label: "Impact", value: "Impact, sans-serif" },
   
   // Web Safe fonts
   { label: "Lucida Console", value: '"Lucida Console", monospace' },
@@ -34,6 +37,9 @@ export const AVAILABLE_FONTS = [
   { label: "Monospace", value: "monospace" },
   { label: "Cursive", value: "cursive" },
   { label: "Fantasy", value: "fantasy" },
+  { label: "UI Sans-Serif", value: "ui-sans-serif" },
+  { label: "UI Serif", value: "ui-serif" },
+  { label: "UI Monospace", value: "ui-monospace" },
 ];
 
 // ── Media Browser helpers ────────────────────────────────────────────────────

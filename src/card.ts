@@ -2,10 +2,8 @@
  * custom-room-card – Main Lovelace card element.
  *
  * An adaptive room layout card with:
- * - Freely-positioned entity buttons with custom backgrounds and overlay modes
- * - Customizable card background (color, image, opacity)
- * - Nested Lovelace cards with full background styling
- * - Custom YAML cards for advanced configurations
+ * - Freely-positioned entity buttons
+ * - Nested Lovelace cards configured with Home Assistant's native editor
  * - Global font family and text styling (title, labels, state)
  * - Responsive design with automatic scaling
  * - Drag-and-drop positioning preview in editor
@@ -38,6 +36,8 @@ import {
   isEntityActive,
   handleAction,
 } from "./helpers";
+
+const REFERENCE_WIDTH = 600;
 
 // ── Registration ─────────────────────────────────────────────────────────────
 
@@ -94,10 +94,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     if (!config) throw new Error("Invalid configuration");
     this._config = {
       show_title: true,
-      background_size: "cover",
-      background_position: "center",
-      background_opacity: 1,
-      aspect_ratio: "16/9",
       ...config,
     };
     // Recreate nested cards when config changes
@@ -105,9 +101,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
   }
 
   public getCardSize(): number {
-    if (this._config?.card_height) {
-      return Math.ceil(this._config.card_height / 50);
-    }
     return 6;
   }
 
@@ -120,8 +113,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
   public static getStubConfig(): Record<string, unknown> {
     return {
       title: "My Room",
-      background_image: "",
-      aspect_ratio: "16/9",
       entities: [],
     };
   }
@@ -156,10 +147,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     if (changedProps.has("_config") && this._config?.nested_cards?.length) {
       this._createNestedCards();
     }
-    // Create custom YAML cards on first render or config change
-    if (changedProps.has("_config") && this._config?.custom_yaml_cards?.length) {
-      this._createCustomYamlCards();
-    }
     // Propagate hass to nested cards
     if (changedProps.has("hass")) {
       this._nestedCards.forEach((card) => {
@@ -177,8 +164,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
 
     const containerClasses = {
       "room-container": true,
-      "aspect-ratio": !this._config.card_height,
-      "fixed-height": !!this._config.card_height,
     };
 
     const containerStyles: Record<string, string> = {
@@ -220,38 +205,12 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       }
     }
     
-    if (this._config.card_height) {
-      containerStyles["--card-height"] = `${this._config.card_height}px`;
-    } else if (this._config.aspect_ratio) {
-      containerStyles["padding-bottom"] = this._aspectRatioPadding(this._config.aspect_ratio);
-    }
-
-    const bgStyles: Record<string, string> = {};
-    if (this._config.background_image) {
-      bgStyles["background-image"] = `url('${this._config.background_image}')`;
-    }
-    if (this._config.background_color) {
-      bgStyles["background-color"] = this._config.background_color;
-    }
-    if (this._config.background_size) {
-      bgStyles["background-size"] = this._config.background_size;
-    }
-    if (this._config.background_position) {
-      bgStyles["background-position"] = this._config.background_position;
-    }
-    if (this._config.background_opacity !== undefined) {
-      bgStyles["opacity"] = String(this._config.background_opacity);
-    }
-
     // Apply custom card styles
     const cardCustomStyles: Record<string, string> = this._config.card_styles ?? {};
 
     return html`
       <ha-card style=${styleMap(cardCustomStyles)}>
         <div class=${classMap(containerClasses)} style=${styleMap(containerStyles)}>
-          <!-- Background -->
-          <div class="room-bg" style=${styleMap(bgStyles)}></div>
-
           <!-- Content layer -->
           <div class="room-content">
             <!-- Title overlay -->
@@ -265,8 +224,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
             <!-- Nested cards -->
             ${(this._config.nested_cards ?? []).map((_, i) => this._renderNestedCard(i))}
 
-            <!-- Custom YAML cards -->
-            ${(this._config.custom_yaml_cards ?? []).map((_, i) => this._renderCustomYamlCard(i))}
           </div>
         </div>
       </ha-card>
@@ -287,7 +244,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       "entity-btn": true,
       active,
       unavailable,
-      "bg-overlay-transparent-children": cfg.background_overlay_mode === "transparent-children",
     };
 
     const scale = this._cardScale;
@@ -301,29 +257,14 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     };
     
     if (cfg.font_size) {
-      btnStyles["--btn-label-size"] = `${cfg.font_size}px`;
-    }
-    
-    // Apply button background styling
-    let styleString = styleMap(btnStyles);
-    if (cfg.button_background_color || cfg.button_background_image) {
-      // Build style string with !important to override CSS defaults
-      let customBg = "";
-      if (cfg.button_background_color) {
-        customBg += `background-color: ${cfg.button_background_color} !important; `;
-      }
-      if (cfg.button_background_image) {
-        customBg += `background-image: url('${cfg.button_background_image}') !important; `;
-        customBg += `background-size: cover !important; `;
-        customBg += `background-position: center !important; `;
-      }
-      styleString = styleString + customBg;
+      btnStyles["--btn-label-font-size"] = `${cfg.font_size}px`;
+      btnStyles["--btn-state-font-size"] = `${cfg.font_size}px`;
     }
 
     return html`
       <button
         class=${classMap(btnClasses)}
-        style=${styleString}
+        style=${styleMap(btnStyles)}
         @pointerdown=${(ev: PointerEvent) => this._onPointerDown(ev, cfg)}
         @pointerup=${() => this._onPointerUp(cfg)}
         @pointercancel=${() => this._cancelHold()}
@@ -356,40 +297,16 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       ...(ncCfg.border_radius ? { "border-radius": ncCfg.border_radius, overflow: "hidden" } : {}),
     };
 
-    // Apply background styling for nested card wrapper
-    if (ncCfg.background_color) {
-      wrapperStyles["background-color"] = ncCfg.background_color;
-      if (ncCfg.background_opacity !== undefined) {
-        wrapperStyles["opacity"] = String(ncCfg.background_opacity);
-      }
-    }
-    if (ncCfg.background_image) {
-      wrapperStyles["background-image"] = `url('${ncCfg.background_image}')`;
-      wrapperStyles["background-size"] = ncCfg.background_size || "cover";
-      wrapperStyles["background-position"] = ncCfg.background_position || "center";
-    }
-
     // Apply custom styles
     if (ncCfg.styles) {
       Object.assign(wrapperStyles, ncCfg.styles);
     }
 
-    const wrapperClasses = {
-      "nested-card-wrapper": true,
-      "bg-overlay-transparent-children": ncCfg.background_overlay_mode === "transparent-children",
-    };
-
     return html`
-      <div class=${classMap(wrapperClasses)}
+      <div class="nested-card-wrapper"
            style=${styleMap(wrapperStyles)}
            id="nested-${index}">
       </div>
-    `;
-  }
-
-  private _renderCustomYamlCard(index: number): TemplateResult {
-    return html`
-      <div class="custom-yaml-card-wrapper" id="custom-yaml-${index}"></div>
     `;
   }
 
@@ -419,103 +336,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
         wrapper.innerHTML = `<div style="color:var(--error-color);padding:8px;">Error loading card</div>`;
       }
     }
-  }
-
-  private async _createCustomYamlCards(): Promise<void> {
-    if (!this._config.custom_yaml_cards) return;
-
-    await this.updateComplete;
-
-    for (let i = 0; i < this._config.custom_yaml_cards.length; i++) {
-      const yamlStr = this._config.custom_yaml_cards[i];
-      const wrapper = this.shadowRoot?.querySelector(`#custom-yaml-${i}`);
-      if (!wrapper) continue;
-
-      // Clear existing content
-      wrapper.innerHTML = "";
-
-      try {
-        // Parse YAML string to config object
-        const cardConfig = this._parseYamlToConfig(yamlStr);
-        if (!cardConfig || !cardConfig.type) {
-          wrapper.innerHTML = `<div style="color:var(--warning-color);padding:8px;">Invalid card config</div>`;
-          continue;
-        }
-
-        const cardEl = await this._createCardElement(cardConfig);
-        if (cardEl) {
-          cardEl.hass = this.hass;
-          wrapper.appendChild(cardEl);
-        }
-      } catch (err) {
-        console.error(`[custom-room-card] Failed to create custom YAML card ${i}:`, err);
-        wrapper.innerHTML = `<div style="color:var(--error-color);padding:8px;">Error: ${(err as Error).message}</div>`;
-      }
-    }
-  }
-
-  private _parseYamlToConfig(yamlStr: string): any {
-    try {
-      // Simple YAML parser for card configs
-      const lines = yamlStr.split('\n');
-      const config: any = {};
-      let currentObj: any = config;
-      const stack: Array<{ key: string; obj: any }> = [];
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) continue;
-
-        const indent = line.length - line.trimStart().length;
-        const depth = Math.floor(indent / 2);
-
-        // Pop stack if we're back to a shallower depth
-        while (stack.length > depth) {
-          stack.pop();
-        }
-
-        currentObj = stack.length > 0 ? stack[stack.length - 1].obj : config;
-
-        // Match key: value or key:
-        const match = trimmed.match(/^([^:]+):\s*(.*)$/);
-        if (match) {
-          const key = match[1].trim();
-          const value = match[2].trim();
-
-          if (!value || value === '') {
-            // Start of a nested object
-            currentObj[key] = {};
-            stack.push({ key, obj: currentObj[key] });
-          } else {
-            // Parse the value
-            currentObj[key] = this._parseYamlValue(value);
-          }
-        }
-      }
-
-      return config;
-    } catch (err) {
-      console.error('Failed to parse YAML:', err);
-      return null;
-    }
-  }
-
-  private _parseYamlValue(val: string): any {
-    if (!val) return val;
-    if (val === 'true') return true;
-    if (val === 'false') return false;
-    if (val === 'null' || val === '~') return null;
-    if (/^-?\d+(\.\d+)?$/.test(val)) return Number(val);
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-      return val.slice(1, -1);
-    }
-    if (val.startsWith('[') && val.endsWith(']')) {
-      try { return JSON.parse(val); } catch { return val; }
-    }
-    if (val.startsWith('{') && val.endsWith('}')) {
-      try { return JSON.parse(val); } catch { return val; }
-    }
-    return val;
   }
 
   private async _createCardElement(
@@ -590,7 +410,7 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       for (const entry of entries) {
         const width = entry.contentRect.width;
         if (width <= 0) continue;
-        const designWidth = this._config?.design_width ?? 600;
+        const designWidth = REFERENCE_WIDTH;
         // Clamp scale between 0.3× and 2× to avoid extreme sizes
         const newScale = Math.max(0.3, Math.min(2, width / designWidth));
         if (Math.abs(newScale - this._cardScale) > 0.005) {
@@ -619,15 +439,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     return v;
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  private _aspectRatioPadding(ratio: string): string {
-    const parts = ratio.split("/").map(Number);
-    if (parts.length === 2 && parts[0] > 0 && parts[1] > 0) {
-      return `${(parts[1] / parts[0]) * 100}%`;
-    }
-    return "56.25%"; // 16:9 fallback
-  }
 }
 
 // ── Declaration for TypeScript ───────────────────────────────────────────────

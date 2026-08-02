@@ -1,8 +1,7 @@
 /**
  * Font and media browser helpers for custom-room-card.
  *
- * NOTE: Font selection is now handled via global_font_family (text field input).
- * The AVAILABLE_FONTS list is maintained for reference and future UI features.
+ * The font list is used by the Home Assistant native select in the editor.
  * Media browser functions can be used for image/media file browsing if needed.
  */
 import { HomeAssistant } from "./types";
