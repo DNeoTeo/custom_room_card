@@ -170,10 +170,13 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       "--card-scale": String(this._cardScale),
     };
     
-    // Apply global font family
-    if (this._config.global_font_family) {
-      containerStyles["--global-font-family"] = this._config.global_font_family;
-    }
+    // Set the variables consumed by the text elements directly. CSS custom
+    // properties that reference another variable are resolved at their owner,
+    // so setting only a parent "global" variable would not update these values.
+    const globalFont = this._config.global_font_family || "system-ui";
+    containerStyles["--title-font-family"] = globalFont;
+    containerStyles["--btn-label-font-family"] = globalFont;
+    containerStyles["--btn-state-font-family"] = globalFont;
     
     // Apply title text styling
     if (this._config.title_style) {

@@ -12,19 +12,16 @@ export const cardStyles = css`
     --btn-icon-color: var(--primary-text-color, #212121);
     --btn-icon-active: var(--primary-color, #2196f3);
     --btn-label-color: var(--secondary-text-color, #727272);
-    --btn-label-font: system-ui;
-    /* Global font family for all text */
-    --global-font-family: system-ui;
     /* Title styling */
-    --title-font-family: var(--global-font-family);
+    --title-font-family: system-ui;
     --title-font-size: 1.2em;
     --title-text-color: var(--primary-text-color);
     /* Button label styling */
-    --btn-label-font-family: var(--global-font-family);
+    --btn-label-font-family: system-ui;
     --btn-label-font-size: 10px;
     --btn-label-text-color: var(--secondary-text-color, #727272);
     /* Button state styling */
-    --btn-state-font-family: var(--global-font-family);
+    --btn-state-font-family: system-ui;
     --btn-state-font-size: 9px;
     --btn-state-text-color: var(--secondary-text-color, #727272);
     display: block;

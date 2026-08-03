@@ -36,6 +36,8 @@ export class CustomRoomCardEditor extends LitElement {
   @property({ attribute: false }) public lovelace?: unknown;
   @state() private _config!: CustomRoomCardConfig;
   @state() private _showNestedCardPicker = false;
+  /** Keep the native picker detached from the dashboard's active view. */
+  private readonly _nestedCardsLovelace = { views: [] };
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -342,7 +344,7 @@ export class CustomRoomCardEditor extends LitElement {
               <div class="card-picker">
                 <hui-card-picker
                   .hass=${this.hass}
-                  .lovelace=${this.lovelace ?? { views: [] }}
+                  .lovelace=${this._nestedCardsLovelace}
                   @config-changed=${this._addNestedCardFromPicker}
                 ></hui-card-picker>
                 <button class="cancel-btn" @click=${() => (this._showNestedCardPicker = false)}>
@@ -383,10 +385,10 @@ export class CustomRoomCardEditor extends LitElement {
 
         <hui-card-element-editor
           .hass=${this.hass}
-          .lovelace=${this.lovelace ?? { views: [] }}
+          .lovelace=${this._nestedCardsLovelace}
           .value=${nc.card}
           @config-changed=${(ev: CustomEvent) =>
-            this._updateNestedCard(index, "card", ev.detail.config as LovelaceCardConfig)}
+            this._updateNestedCardFromEditor(ev, index)}
         ></hui-card-element-editor>
 
         <!-- Position & Size -->
@@ -554,6 +556,9 @@ export class CustomRoomCardEditor extends LitElement {
   // ── Nested card handlers ───────────────────────────────────────────────────
 
   private _addNestedCardFromPicker(ev: CustomEvent<{ config?: LovelaceCardConfig }>): void {
+    // hui-card-picker emits the same bubbling event as the dashboard editor.
+    // Stop it here so only this card's nested_cards configuration is updated.
+    ev.stopPropagation();
     const card = ev.detail?.config;
     if (!card?.type) return;
     const nestedCards = [...(this._config.nested_cards ?? [])];
@@ -566,6 +571,13 @@ export class CustomRoomCardEditor extends LitElement {
     });
     this._showNestedCardPicker = false;
     this._updateConfig("nested_cards", nestedCards);
+  }
+
+  private _updateNestedCardFromEditor(ev: CustomEvent<{ config?: LovelaceCardConfig }>, index: number): void {
+    ev.stopPropagation();
+    const card = ev.detail?.config;
+    if (!card?.type) return;
+    this._updateNestedCard(index, "card", card);
   }
 
   private _removeNestedCard(index: number): void {
