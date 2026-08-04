@@ -39,10 +39,55 @@ export class CustomRoomCardEditor extends LitElement {
   /** Keep the native picker detached from the dashboard's active view. */
   private readonly _nestedCardsLovelace = { views: [] };
 
+  /**
+   * The native Lovelace picker/editor dispatches `config-changed`, the same
+   * event used by the dashboard editor. Capture these events inside this
+   * shadow root before they can reach the view editor, then write only to our
+   * `nested_cards` configuration.
+   */
+  private readonly _onNestedCardConfigChanged = (event: Event): void => {
+    const path = event.composedPath();
+    const picker = path.find(
+      (target): target is HTMLElement =>
+        target instanceof HTMLElement && target.hasAttribute("data-nested-card-picker")
+    );
+    const cardEditor = path.find(
+      (target): target is HTMLElement =>
+        target instanceof HTMLElement && target.hasAttribute("data-nested-card-index")
+    );
+
+    if (!picker && !cardEditor) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const card = (event as CustomEvent<{ config?: LovelaceCardConfig }>).detail?.config;
+    if (!card?.type) return;
+
+    if (picker) {
+      this._addNestedCard(card);
+      return;
+    }
+
+    const index = Number(cardEditor?.dataset.nestedCardIndex);
+    if (Number.isInteger(index) && index >= 0) {
+      this._updateNestedCard(index, "card", card);
+    }
+  };
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   public setConfig(config: CustomRoomCardConfig): void {
     this._config = deepClone(config);
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.renderRoot.addEventListener("config-changed", this._onNestedCardConfigChanged, true);
+  }
+
+  disconnectedCallback(): void {
+    this.renderRoot.removeEventListener("config-changed", this._onNestedCardConfigChanged, true);
+    super.disconnectedCallback();
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -87,9 +132,11 @@ export class CustomRoomCardEditor extends LitElement {
           <ha-select
             label="Global Font Family"
             .value=${this._config.global_font_family ?? "system-ui"}
-            @value-changed=${(ev: CustomEvent) =>
-              this._updateConfig("global_font_family", ev.detail.value || "system-ui")}
+            .options=${AVAILABLE_FONTS}
+            @selected=${this._onFontSelected}
+            @value-changed=${this._onFontSelected}
           >
+            <!-- Compatibility with Home Assistant versions that still use slots. -->
             ${AVAILABLE_FONTS.map(
               (font) => html`<mwc-list-item value=${font.value}>${font.label}</mwc-list-item>`
             )}
@@ -343,9 +390,9 @@ export class CustomRoomCardEditor extends LitElement {
           ? html`
               <div class="card-picker">
                 <hui-card-picker
+                  data-nested-card-picker
                   .hass=${this.hass}
                   .lovelace=${this._nestedCardsLovelace}
-                  @config-changed=${this._addNestedCardFromPicker}
                 ></hui-card-picker>
                 <button class="cancel-btn" @click=${() => (this._showNestedCardPicker = false)}>
                   Cancel
@@ -384,11 +431,10 @@ export class CustomRoomCardEditor extends LitElement {
         </div>
 
         <hui-card-element-editor
+          data-nested-card-index=${String(index)}
           .hass=${this.hass}
           .lovelace=${this._nestedCardsLovelace}
           .value=${nc.card}
-          @config-changed=${(ev: CustomEvent) =>
-            this._updateNestedCardFromEditor(ev, index)}
         ></hui-card-element-editor>
 
         <!-- Position & Size -->
@@ -553,14 +599,18 @@ export class CustomRoomCardEditor extends LitElement {
     return /^#[0-9a-f]{6}$/i.test(value ?? "") ? value! : "#000000";
   }
 
+  private _onFontSelected(event: Event): void {
+    const detailValue = (event as CustomEvent<{ value?: unknown }>).detail?.value;
+    const elementValue = (event.currentTarget as { value?: unknown } | null)?.value;
+    const value = typeof detailValue === "string" ? detailValue : elementValue;
+    if (typeof value === "string" && value) {
+      this._updateConfig("global_font_family", value);
+    }
+  }
+
   // ── Nested card handlers ───────────────────────────────────────────────────
 
-  private _addNestedCardFromPicker(ev: CustomEvent<{ config?: LovelaceCardConfig }>): void {
-    // hui-card-picker emits the same bubbling event as the dashboard editor.
-    // Stop it here so only this card's nested_cards configuration is updated.
-    ev.stopPropagation();
-    const card = ev.detail?.config;
-    if (!card?.type) return;
+  private _addNestedCard(card: LovelaceCardConfig): void {
     const nestedCards = [...(this._config.nested_cards ?? [])];
     nestedCards.push({
       card,
@@ -571,13 +621,6 @@ export class CustomRoomCardEditor extends LitElement {
     });
     this._showNestedCardPicker = false;
     this._updateConfig("nested_cards", nestedCards);
-  }
-
-  private _updateNestedCardFromEditor(ev: CustomEvent<{ config?: LovelaceCardConfig }>, index: number): void {
-    ev.stopPropagation();
-    const card = ev.detail?.config;
-    if (!card?.type) return;
-    this._updateNestedCard(index, "card", card);
   }
 
   private _removeNestedCard(index: number): void {
