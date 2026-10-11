@@ -66,6 +66,7 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: CustomRoomCardConfig;
   @state() private _nestedCards: Map<number, LovelaceCard> = new Map();
+  @state() private _resolvedBackgroundImage?: string;
 
   /** Responsive scale factor: actualWidth / designWidth */
   @state() private _cardScale = 1;
@@ -98,6 +99,7 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     };
     // Recreate nested cards when config changes
     this._nestedCards = new Map();
+    this._resolvedBackgroundImage = undefined;
   }
 
   public getCardSize(): number {
@@ -146,6 +148,9 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     // Create nested cards on first render or config change
     if (changedProps.has("_config") && this._config?.nested_cards?.length) {
       this._createNestedCards();
+    }
+    if ((changedProps.has("_config") || changedProps.has("hass")) && this._config?.background_image) {
+      this._resolveBackgroundImage();
     }
     // Propagate hass to nested cards
     if (changedProps.has("hass")) {
@@ -200,10 +205,15 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
 
     // Apply custom card styles
     const cardCustomStyles: Record<string, string> = this._config.card_styles ?? {};
+    const backgroundImage = this._resolvedBackgroundImage ?? this._config.background_image;
+    const backgroundStyles: Record<string, string> = backgroundImage
+      ? { "background-image": `url('${backgroundImage}')` }
+      : {};
 
     return html`
       <ha-card style=${styleMap(cardCustomStyles)}>
         <div class=${classMap(containerClasses)} style=${styleMap(containerStyles)}>
+          ${backgroundImage ? html`<div class="room-bg" style=${styleMap(backgroundStyles)}></div>` : nothing}
           <!-- Content layer -->
           <div class="room-content">
             <!-- Title overlay -->
@@ -338,6 +348,34 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
         console.error(`[custom-room-card] Failed to create nested card ${i}:`, err);
         wrapper.innerHTML = `<div style="color:var(--error-color);padding:8px;">Error loading card</div>`;
       }
+    }
+  }
+
+  private async _resolveBackgroundImage(): Promise<void> {
+    const image = this._config?.background_image;
+    if (!image) {
+      this._resolvedBackgroundImage = undefined;
+      return;
+    }
+    if (!image.startsWith("media-source://")) {
+      this._resolvedBackgroundImage = image;
+      return;
+    }
+
+    const connection = this.hass?.connection as {
+      sendMessagePromise?: (message: Record<string, unknown>) => Promise<{ url?: string }>;
+    } | undefined;
+    if (!connection?.sendMessagePromise) return;
+    try {
+      const resolved = await connection.sendMessagePromise({
+        type: "media_source/resolve_media",
+        media_content_id: image,
+      });
+      if (this._config.background_image === image && resolved.url) {
+        this._resolvedBackgroundImage = resolved.url;
+      }
+    } catch (error) {
+      console.warn("[custom-room-card] Could not resolve background image", error);
     }
   }
 

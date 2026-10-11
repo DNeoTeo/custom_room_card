@@ -36,6 +36,8 @@ export class CustomRoomCardEditor extends LitElement {
   @property({ attribute: false }) public lovelace?: unknown;
   @state() private _config!: CustomRoomCardConfig;
   @state() private _showNestedCardPicker = false;
+  @state() private _isUploadingBackground = false;
+  @state() private _backgroundUploadError?: string;
   /** Keep the native picker detached from the dashboard's active view. */
   private readonly _nestedCardsLovelace = { views: [] };
 
@@ -145,6 +147,34 @@ export class CustomRoomCardEditor extends LitElement {
         <p class="native-layout-info">
           La largeur et la hauteur de la carte sont gérées par Home Assistant. Le canevas s'adapte automatiquement pour le placement des éléments.
         </p>
+        <div class="background-upload">
+          <div class="background-upload-title">Background Image</div>
+          <div class="background-upload-actions">
+            <label class="file-upload-btn">
+              <ha-icon icon="mdi:upload"></ha-icon>
+              ${this._isUploadingBackground ? "Importing…" : "Import image"}
+              <input
+                type="file"
+                accept="image/*"
+                ?disabled=${this._isUploadingBackground}
+                @change=${this._uploadBackgroundImage}
+              />
+            </label>
+            ${this._config.background_image
+              ? html`
+                  <button type="button" class="clear-btn" @click=${this._clearBackgroundImage}>
+                    Remove image
+                  </button>
+                `
+              : nothing}
+          </div>
+          ${this._config.background_image
+            ? html`<div class="background-upload-name">${this._config.background_image}</div>`
+            : nothing}
+          ${this._backgroundUploadError
+            ? html`<div class="upload-error">${this._backgroundUploadError}</div>`
+            : nothing}
+        </div>
       </div>
     `;
   }
@@ -242,7 +272,7 @@ export class CustomRoomCardEditor extends LitElement {
           ${entities.map((e, i) => this._renderEntityRow(e, i))}
         </div>
 
-        <button class="add-btn" @click=${this._addEntity} title="Add entity button">
+        <button type="button" class="add-btn" @click=${this._addEntity} title="Add entity button">
           <ha-icon icon="mdi:plus"></ha-icon>
         </button>
       </div>
@@ -255,13 +285,13 @@ export class CustomRoomCardEditor extends LitElement {
   ): TemplateResult {
     return html`
       <div class="entity-row">
-        <ha-entity-picker
+        <ha-selector
           .hass=${this.hass}
+          .selector=${{ entity: {} }}
           .value=${entity.entity ?? ""}
-          allow-custom-entity
           @value-changed=${(ev: CustomEvent) =>
             this._updateEntity(index, "entity", ev.detail.value)}
-        ></ha-entity-picker>
+        ></ha-selector>
 
         <button
           class="remove-btn"
@@ -555,7 +585,7 @@ export class CustomRoomCardEditor extends LitElement {
 
   // ── Event handlers ─────────────────────────────────────────────────────────
 
-  private _addEntity(): void {
+  private _addEntity = (): void => {
     const entities = [...(this._config.entities ?? [])];
     entities.push({
       entity: "",
@@ -563,7 +593,10 @@ export class CustomRoomCardEditor extends LitElement {
       top: DEFAULT_ENTITY_BUTTON.top!,
     });
     this._updateConfig("entities", entities);
-  }
+    // Update the editor immediately; Home Assistant will subsequently echo the
+    // config-changed event back through setConfig.
+    this.requestUpdate();
+  };
 
   private _removeEntity(index: number): void {
     const entities = [...(this._config.entities ?? [])];
@@ -612,6 +645,48 @@ export class CustomRoomCardEditor extends LitElement {
     }
   }
 
+  private _clearBackgroundImage = (): void => {
+    this._backgroundUploadError = undefined;
+    this._updateConfig("background_image", undefined);
+  };
+
+  private _uploadBackgroundImage = async (event: Event): Promise<void> => {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+
+    this._backgroundUploadError = undefined;
+    if (!file.type.startsWith("image/")) {
+      this._backgroundUploadError = "Please choose an image file.";
+      return;
+    }
+
+    this._isUploadingBackground = true;
+    try {
+      const formData = new FormData();
+      formData.append("media_content_id", "media-source://media_source/local");
+      formData.append("file", file, file.name);
+      const response = await fetch("/api/media_source/local_source/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        throw new Error(`Upload failed (${response.status})`);
+      }
+      const result = (await response.json()) as { media_content_id?: string };
+      if (!result.media_content_id) {
+        throw new Error("Home Assistant did not return the uploaded image.");
+      }
+      this._updateConfig("background_image", result.media_content_id);
+    } catch (error) {
+      this._backgroundUploadError = error instanceof Error ? error.message : "Unable to import the image.";
+    } finally {
+      this._isUploadingBackground = false;
+    }
+  };
+
   // ── Nested card handlers ───────────────────────────────────────────────────
 
   private _addNestedCard(card: LovelaceCardConfig): void {
@@ -646,6 +721,7 @@ export class CustomRoomCardEditor extends LitElement {
 
   private _updateConfig(key: string, value: unknown): void {
     this._config = { ...this._config, [key]: value };
+    this.requestUpdate();
     this._fireConfigChanged();
   }
 

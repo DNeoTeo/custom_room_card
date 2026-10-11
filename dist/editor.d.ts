@@ -17,6 +17,8 @@ export declare class CustomRoomCardEditor extends LitElement {
     lovelace?: unknown;
     private _config;
     private _showNestedCardPicker;
+    private _isUploadingBackground;
+    private _backgroundUploadError?;
     /** Keep the native picker detached from the dashboard's active view. */
     private readonly _nestedCardsLovelace;
     /**
@@ -43,6 +45,8 @@ export declare class CustomRoomCardEditor extends LitElement {
     private _updateTextStyle;
     private _colorPickerValue;
     private _onFontSelected;
+    private _clearBackgroundImage;
+    private _uploadBackgroundImage;
     private _addNestedCard;
     private _removeNestedCard;
     private _updateNestedCard;

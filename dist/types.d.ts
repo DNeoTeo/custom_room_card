@@ -107,6 +107,8 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
     type: string;
     /** Card title */
     title?: string;
+    /** Image URL or Home Assistant media-source URI used as the card background */
+    background_image?: string;
     /** Global font family for all text in the card */
     global_font_family?: string;
     /** Title text styling */

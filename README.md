@@ -13,6 +13,7 @@ A custom [Home Assistant](https://www.home-assistant.io/) Lovelace card that let
 ## Features
 
 - **Freely positioned buttons** – Place entity buttons anywhere using `left`/`top` percentages
+- **Image background** – Import an image from a computer or phone into Home Assistant media storage
 - **Adaptive layout** – The card width is managed by Home Assistant and its canvas scales responsively
 - **Entity actions** – Tap to toggle, hold for more-info (fully configurable)
 - **Native icon picker** – Browse Home Assistant/MDI icons instead of entering an icon name
@@ -143,6 +144,7 @@ nested_cards:
 | `type`               | string   | *required* | Must be `custom:custom-room-card`                   |
 | `title`              | string   | —          | Room title shown in the top-left overlay            |
 | `show_title`         | boolean  | `true`     | Show / hide the title overlay                       |
+| `background_image`   | string   | —          | Image URL or Home Assistant media-source URI        |
 | `global_font_family` | string   | `system-ui`| Font family for all text                             |
 | `title_style`        | object   | —          | Title styling (font_size, text_color)               |
 | `button_label_style` | object   | —          | Button label styling (font_size, text_color)        |

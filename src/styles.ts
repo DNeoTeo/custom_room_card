@@ -42,6 +42,16 @@ export const cardStyles = css`
     overflow: hidden;
   }
 
+  .room-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    pointer-events: none;
+  }
+
   /* ── Content layer ───────────────────────────────────── */
   .room-content {
     position: absolute;
@@ -249,7 +259,7 @@ export const editorStyles = css`
     padding-right: 44px;
   }
 
-  .entity-row > ha-entity-picker {
+  .entity-row > ha-selector {
     width: 100%;
   }
 
@@ -344,6 +354,65 @@ export const editorStyles = css`
     font-size: 12px;
     line-height: 1.5;
     color: var(--secondary-text-color);
+  }
+
+  .background-upload {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--divider-color, #e0e0e0);
+  }
+
+  .background-upload-title {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--primary-text-color);
+  }
+
+  .background-upload-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .file-upload-btn,
+  .clear-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 12px;
+    cursor: pointer;
+    border: 0;
+    border-radius: 6px;
+    font: inherit;
+  }
+
+  .file-upload-btn {
+    color: white;
+    background: var(--primary-color);
+  }
+
+  .file-upload-btn input {
+    display: none;
+  }
+
+  .clear-btn {
+    color: var(--error-color, #db4437);
+    background: transparent;
+  }
+
+  .background-upload-name,
+  .upload-error {
+    overflow: hidden;
+    margin-top: 8px;
+    color: var(--secondary-text-color);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .upload-error {
+    color: var(--error-color, #db4437);
   }
 
   .preview-box {

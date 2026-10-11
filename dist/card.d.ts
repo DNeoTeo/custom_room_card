@@ -15,6 +15,7 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     hass: HomeAssistant;
     private _config;
     private _nestedCards;
+    private _resolvedBackgroundImage?;
     /** Responsive scale factor: actualWidth / designWidth */
     private _cardScale;
     private _resizeObserver?;
@@ -35,6 +36,7 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     private _renderEntityButton;
     private _renderNestedCard;
     private _createNestedCards;
+    private _resolveBackgroundImage;
     private _createCardElement;
     private _onPointerDown;
     private _onPointerUp;
