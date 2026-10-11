@@ -80,6 +80,8 @@ export interface EntityButtonConfig {
   show_label?: boolean;
   /** Show entity state */
   show_state?: boolean;
+  /** Background color for this entity button */
+  background_color?: string;
   /** Custom tap action */
   tap_action?: ActionConfig;
   /** Custom hold action */
@@ -113,6 +115,8 @@ export interface NestedCardConfig {
   z_index?: number;
   /** CSS border-radius override */
   border_radius?: string;
+  /** Background color for this nested card */
+  background_color?: string;
   /** Custom CSS styles applied to the wrapper */
   styles?: Record<string, string>;
 }
@@ -135,8 +139,6 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
   title_style?: TextStyleConfig;
   /** Entity button label text styling */
   button_label_style?: TextStyleConfig;
-  /** Entity button state text styling */
-  button_state_style?: TextStyleConfig;
   /** Entity buttons */
   entities?: EntityButtonConfig[];
   /** Nested Lovelace cards */

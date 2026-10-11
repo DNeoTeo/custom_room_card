@@ -4,7 +4,7 @@
  * An adaptive room layout card with:
  * - Freely-positioned entity buttons
  * - Nested Lovelace cards configured with Home Assistant's native editor
- * - Global font family and text styling (title, labels, state)
+ * - Global font family and text styling (title and labels)
  * - Responsive design with automatic scaling
  * - Drag-and-drop positioning preview in editor
  */
@@ -198,16 +198,6 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       }
     }
 
-    // Apply button state text styling
-    if (this._config.button_state_style) {
-      if (this._config.button_state_style.font_size) {
-        containerStyles["--btn-state-font-size"] = `${this._config.button_state_style.font_size}px`;
-      }
-      if (this._config.button_state_style.text_color) {
-        containerStyles["--btn-state-text-color"] = this._config.button_state_style.text_color;
-      }
-    }
-    
     // Apply custom card styles
     const cardCustomStyles: Record<string, string> = this._config.card_styles ?? {};
 
@@ -258,10 +248,13 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       transform: "translate(-50%, -50%)",
       ...((cfg.styles as Record<string, string>) ?? {}),
     };
+
+    if (cfg.background_color) {
+      btnStyles["background-color"] = cfg.background_color;
+    }
     
     if (cfg.font_size) {
       btnStyles["--btn-label-font-size"] = `${cfg.font_size}px`;
-      btnStyles["--btn-state-font-size"] = `${cfg.font_size}px`;
     }
 
     return html`
@@ -299,6 +292,13 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       "z-index": String(ncCfg.z_index ?? 2),
       ...(ncCfg.border_radius ? { "border-radius": ncCfg.border_radius, overflow: "hidden" } : {}),
     };
+
+    if (ncCfg.background_color) {
+      wrapperStyles["background-color"] = ncCfg.background_color;
+      // Native Lovelace cards consume these theme variables for their surface.
+      wrapperStyles["--ha-card-background"] = ncCfg.background_color;
+      wrapperStyles["--card-background-color"] = ncCfg.background_color;
+    }
 
     // Apply custom styles
     if (ncCfg.styles) {

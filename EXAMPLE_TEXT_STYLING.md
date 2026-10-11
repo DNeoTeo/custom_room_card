@@ -10,9 +10,6 @@ title_style:
 button_label_style:
   font_size: 13
   text_color: "#212121"
-button_state_style:
-  font_size: 11
-  text_color: "#666666"
 entities:
   - entity: light.living_room
     left: 30
@@ -22,4 +19,4 @@ entities:
     show_state: true
 ```
 
-The `font_size` on an entity button overrides both its label and state size. The visual editor exposes the same settings, plus a native Home Assistant icon picker and color controls.
+The `font_size` on an entity button overrides its label size. The visual editor exposes the same settings, plus a native Home Assistant icon picker and color controls.

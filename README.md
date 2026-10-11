@@ -17,8 +17,8 @@ A custom [Home Assistant](https://www.home-assistant.io/) Lovelace card that let
 - **Entity actions** – Tap to toggle, hold for more-info (fully configurable)
 - **Native icon picker** – Browse Home Assistant/MDI icons instead of entering an icon name
 - **Nested cards** – Choose and configure any Lovelace card with Home Assistant's native card picker and editor
-- **Global font family** – Select a supported font family for all text (title, labels, state)
-- **Text styling** – Customize font sizes and colors for title, button labels, and entity state
+- **Global font family** – Select a supported font family for all text
+- **Text styling** – Customize font sizes and colors for title and button labels
 - **Visual editor** – Full GUI editor with live position preview
 - **Responsive design** – All sizes automatically scale to fit screen width
 - **Theming** – Respects HA theme variables, supports custom CSS overrides
@@ -143,10 +143,9 @@ nested_cards:
 | `type`               | string   | *required* | Must be `custom:custom-room-card`                   |
 | `title`              | string   | —          | Room title shown in the top-left overlay            |
 | `show_title`         | boolean  | `true`     | Show / hide the title overlay                       |
-| `global_font_family` | string   | `system-ui`| Font family for all text (title, labels, state)     |
+| `global_font_family` | string   | `system-ui`| Font family for all text                             |
 | `title_style`        | object   | —          | Title styling (font_size, text_color)               |
 | `button_label_style` | object   | —          | Button label styling (font_size, text_color)        |
-| `button_state_style` | object   | —          | Entity state text styling (font_size, text_color)   |
 | `entities`           | list     | `[]`       | Array of entity button configurations               |
 | `nested_cards`       | list     | `[]`       | Array of nested Lovelace card configurations        |
 | `card_styles`        | object   | —          | Custom CSS key/value pairs for the `<ha-card>`      |
@@ -164,7 +163,8 @@ nested_cards:
 | `label`                   | string  | *friendly_name*| Custom label text                              |
 | `show_label`              | boolean | `true`         | Show label below icon                          |
 | `show_state`              | boolean | `false`        | Show entity state text                         |
-| `font_size`               | number  | `10`           | Font size in px for label and state            |
+| `font_size`               | number  | `10`           | Font size in px for the label                  |
+| `background_color`        | string  | —              | Background color for this button               |
 | `tap_action`              | object  | `toggle`       | Action on tap (see Actions)                    |
 | `hold_action`             | object  | `more-info`    | Action on long-press (see Actions)             |
 | `styles`                  | object  | —              | Custom CSS key/value pairs for this button     |
@@ -195,6 +195,7 @@ You can embed **any Lovelace card** (built-in or custom) and position it freely.
 | `label`                   | string  | —          | Label shown in the editor preview only                   |
 | `z_index`                 | number  | `2`        | Layer order (higher = on top)                            |
 | `border_radius`           | string  | —          | CSS border-radius (e.g. `16px`)                          |
+| `background_color`        | string  | —          | Background color for this nested card                       |
 | `styles`                  | object  | —          | Custom CSS key/value pairs for the wrapper               |
 
 #### Nested card examples

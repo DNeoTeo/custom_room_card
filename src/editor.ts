@@ -154,7 +154,6 @@ export class CustomRoomCardEditor extends LitElement {
   private _renderTextStyleSection(): TemplateResult {
     const titleStyle = this._config.title_style ?? {};
     const labelStyle = this._config.button_label_style ?? {};
-    const stateStyle = this._config.button_state_style ?? {};
 
     return html`
       <div class="editor-section">
@@ -223,35 +222,6 @@ export class CustomRoomCardEditor extends LitElement {
           </div>
         </div>
 
-        <!-- Button state styling -->
-        <div>
-          <h3 style="margin: 0 0 12px 0; color: var(--primary-text-color); font-size: 0.95em;">Button State</h3>
-          <div class="form-row">
-            <ha-textfield
-              label="Font Size (px)"
-              type="number"
-              .value=${stateStyle.font_size?.toString() ?? ""}
-              @input=${(ev: InputEvent) => {
-                const v = (ev.target as HTMLInputElement).value;
-                this._updateTextStyle("button_state_style", "font_size", v ? Number(v) : undefined);
-              }}
-            ></ha-textfield>
-            <ha-textfield
-              label="Text Color"
-              .value=${stateStyle.text_color ?? ""}
-              @input=${(ev: InputEvent) =>
-                this._updateTextStyle("button_state_style", "text_color", (ev.target as HTMLInputElement).value || undefined)}
-            ></ha-textfield>
-            <input
-              class="color-picker"
-              type="color"
-              aria-label="Pick button state color"
-              .value=${this._colorPickerValue(stateStyle.text_color)}
-              @input=${(ev: InputEvent) =>
-                this._updateTextStyle("button_state_style", "text_color", (ev.target as HTMLInputElement).value)}
-            />
-          </div>
-        </div>
       </div>
     `;
   }
@@ -320,6 +290,23 @@ export class CustomRoomCardEditor extends LitElement {
             @input=${(ev: InputEvent) =>
               this._updateEntity(index, "top", Number((ev.target as HTMLInputElement).value))}
           ></ha-textfield>
+        </div>
+
+        <div class="entity-extra-row">
+          <ha-textfield
+            label="Button Background Color"
+            .value=${entity.background_color ?? ""}
+            @input=${(ev: InputEvent) =>
+              this._updateEntity(index, "background_color", (ev.target as HTMLInputElement).value || undefined)}
+          ></ha-textfield>
+          <input
+            class="color-picker"
+            type="color"
+            aria-label="Pick entity button background color"
+            .value=${this._colorPickerValue(entity.background_color)}
+            @input=${(ev: InputEvent) =>
+              this._updateEntity(index, "background_color", (ev.target as HTMLInputElement).value)}
+          />
         </div>
 
         <div class="entity-extra-row">
@@ -471,6 +458,23 @@ export class CustomRoomCardEditor extends LitElement {
           ></ha-textfield>
         </div>
 
+        <div class="form-row">
+          <ha-textfield
+            label="Nested Card Background Color"
+            .value=${nc.background_color ?? ""}
+            @input=${(ev: InputEvent) =>
+              this._updateNestedCard(index, "background_color", (ev.target as HTMLInputElement).value || undefined)}
+          ></ha-textfield>
+          <input
+            class="color-picker"
+            type="color"
+            aria-label="Pick nested card background color"
+            .value=${this._colorPickerValue(nc.background_color)}
+            @input=${(ev: InputEvent) =>
+              this._updateNestedCard(index, "background_color", (ev.target as HTMLInputElement).value)}
+          />
+        </div>
+
         <!-- Advanced options (collapsed by default) -->
         <details class="advanced-options">
           <summary>Advanced options</summary>
@@ -581,7 +585,7 @@ export class CustomRoomCardEditor extends LitElement {
   // ── Text style handlers ────────────────────────────────────────────────────
 
   private _updateTextStyle(
-    styleKey: "title_style" | "button_label_style" | "button_state_style",
+    styleKey: "title_style" | "button_label_style",
     property: "font_family" | "font_size" | "text_color",
     value: string | number | undefined
   ): void {

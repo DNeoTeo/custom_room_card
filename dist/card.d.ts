@@ -4,7 +4,7 @@
  * An adaptive room layout card with:
  * - Freely-positioned entity buttons
  * - Nested Lovelace cards configured with Home Assistant's native editor
- * - Global font family and text styling (title, labels, state)
+ * - Global font family and text styling (title and labels)
  * - Responsive design with automatic scaling
  * - Drag-and-drop positioning preview in editor
  */
