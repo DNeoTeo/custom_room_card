@@ -10,6 +10,8 @@ export interface HomeAssistant {
     serviceData?: Record<string, unknown>,
     target?: { entity_id: string | string[] }
   ): Promise<void>;
+  callWS<T = unknown>(message: Record<string, unknown>): Promise<T>;
+  fetchWithAuth(path: string, init?: RequestInit): Promise<Response>;
   formatEntityState(stateObj: HassEntity): string;
   formatEntityAttributeValue(
     stateObj: HassEntity,

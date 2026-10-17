@@ -362,12 +362,8 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
       return;
     }
 
-    const connection = this.hass?.connection as {
-      sendMessagePromise?: (message: Record<string, unknown>) => Promise<{ url?: string }>;
-    } | undefined;
-    if (!connection?.sendMessagePromise) return;
     try {
-      const resolved = await connection.sendMessagePromise({
+      const resolved = await this.hass.callWS<{ url?: string }>({
         type: "media_source/resolve_media",
         media_content_id: image,
       });

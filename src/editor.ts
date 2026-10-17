@@ -667,10 +667,11 @@ export class CustomRoomCardEditor extends LitElement {
       const formData = new FormData();
       formData.append("media_content_id", "media-source://media_source/local");
       formData.append("file", file, file.name);
-      const response = await fetch("/api/media_source/local_source/upload", {
+      // Use Home Assistant's authenticated fetch helper. A regular browser
+      // fetch has no bearer token and the media endpoint correctly rejects it.
+      const response = await this.hass.fetchWithAuth("/api/media_source/local_source/upload", {
         method: "POST",
         body: formData,
-        credentials: "same-origin",
       });
       if (!response.ok) {
         throw new Error(`Upload failed (${response.status})`);

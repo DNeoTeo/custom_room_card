@@ -4,6 +4,8 @@ export interface HomeAssistant {
     callService(domain: string, service: string, serviceData?: Record<string, unknown>, target?: {
         entity_id: string | string[];
     }): Promise<void>;
+    callWS<T = unknown>(message: Record<string, unknown>): Promise<T>;
+    fetchWithAuth(path: string, init?: RequestInit): Promise<Response>;
     formatEntityState(stateObj: HassEntity): string;
     formatEntityAttributeValue(stateObj: HassEntity, attribute: string): string;
     localize(key: string, ...args: unknown[]): string;
