@@ -375,6 +375,62 @@ export const editorStyles = css`
     gap: 8px;
   }
 
+  .background-media-selector {
+    display: block;
+    margin-top: 12px;
+  }
+
+  .background-help {
+    margin: 6px 0 0;
+    color: var(--secondary-text-color);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .background-conditions {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--divider-color, #e0e0e0);
+  }
+
+  .background-condition-row {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid var(--divider-color, #e0e0e0);
+    border-radius: 8px;
+    background: var(--secondary-background-color, #f5f5f5);
+  }
+
+  .background-condition-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 30px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--primary-text-color);
+  }
+
+  .background-condition-selector {
+    display: block;
+    margin-top: 12px;
+  }
+
+  .add-condition-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    margin-top: 12px;
+    padding: 0 12px;
+    cursor: pointer;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 6px;
+    background: transparent;
+    font: inherit;
+  }
+
   .file-upload-btn,
   .clear-btn {
     display: inline-flex;

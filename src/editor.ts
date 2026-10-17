@@ -15,6 +15,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 import {
   CustomRoomCardConfig,
+  BackgroundConditionConfig,
   EntityButtonConfig,
   NestedCardConfig,
   HomeAssistant,
@@ -148,11 +149,11 @@ export class CustomRoomCardEditor extends LitElement {
           La largeur et la hauteur de la carte sont gérées par Home Assistant. Le canevas s'adapte automatiquement pour le placement des éléments.
         </p>
         <div class="background-upload">
-          <div class="background-upload-title">Background Image</div>
+          <div class="background-upload-title">Image de fond par défaut</div>
           <div class="background-upload-actions">
             <label class="file-upload-btn">
               <ha-icon icon="mdi:upload"></ha-icon>
-              ${this._isUploadingBackground ? "Importing…" : "Import image"}
+              ${this._isUploadingBackground ? "Import en cours…" : "Importer une image"}
               <input
                 type="file"
                 accept="image/*"
@@ -168,6 +169,14 @@ export class CustomRoomCardEditor extends LitElement {
                 `
               : nothing}
           </div>
+          <ha-selector
+            class="background-media-selector"
+            .hass=${this.hass}
+            .selector=${{ media: { accept: ["image/*"], hide_content_type: true } }}
+            .value=${this._mediaSelectorValue(this._config.background_image)}
+            @value-changed=${this._onDefaultBackgroundSelected}
+          ></ha-selector>
+          <p class="background-help">Choisir une image déjà présente dans la médiathèque Home Assistant.</p>
           ${this._config.background_image
             ? html`<div class="background-upload-name">${this._config.background_image}</div>`
             : nothing}
@@ -175,6 +184,53 @@ export class CustomRoomCardEditor extends LitElement {
             ? html`<div class="upload-error">${this._backgroundUploadError}</div>`
             : nothing}
         </div>
+        ${this._renderBackgroundConditions()}
+      </div>
+    `;
+  }
+
+  private _renderBackgroundConditions(): TemplateResult {
+    const rules = this._config.background_conditions ?? [];
+    return html`
+      <div class="background-conditions">
+        <div class="background-upload-title">Fonds conditionnels</div>
+        <p class="background-help">
+          La première règle satisfaite est appliquée. Les conditions sont celles des automatisations Home Assistant.
+        </p>
+        ${rules.map((rule, index) => this._renderBackgroundCondition(rule, index))}
+        <button type="button" class="add-condition-btn" @click=${this._addBackgroundCondition}>
+          <ha-icon icon="mdi:plus"></ha-icon>
+          Ajouter une règle de fond
+        </button>
+      </div>
+    `;
+  }
+
+  private _renderBackgroundCondition(
+    rule: BackgroundConditionConfig,
+    index: number
+  ): TemplateResult {
+    return html`
+      <div class="background-condition-row">
+        <div class="background-condition-header">
+          <span>Règle ${index + 1}</span>
+          <button type="button" class="remove-btn" @click=${() => this._removeBackgroundCondition(index)} title="Supprimer la règle">
+            <ha-icon icon="mdi:close"></ha-icon>
+          </button>
+        </div>
+        <ha-selector
+          .hass=${this.hass}
+          .selector=${{ media: { accept: ["image/*"], hide_content_type: true } }}
+          .value=${this._mediaSelectorValue(rule.image)}
+          @value-changed=${(event: CustomEvent) => this._updateBackgroundConditionImage(index, event)}
+        ></ha-selector>
+        <ha-selector
+          class="background-condition-selector"
+          .hass=${this.hass}
+          .selector=${{ condition: { optionsInSidebar: false } }}
+          .value=${rule.conditions}
+          @value-changed=${(event: CustomEvent) => this._updateBackgroundConditions(index, event)}
+        ></ha-selector>
       </div>
     `;
   }
@@ -650,6 +706,53 @@ export class CustomRoomCardEditor extends LitElement {
     this._updateConfig("background_image", undefined);
   };
 
+  /** Convert the value emitted by HA's media selector into our compact URI. */
+  private _mediaContentId(value: unknown): string | undefined {
+    if (typeof value === "string") return value || undefined;
+    if (value && typeof value === "object") {
+      const contentId = (value as { media_content_id?: unknown }).media_content_id;
+      return typeof contentId === "string" && contentId ? contentId : undefined;
+    }
+    return undefined;
+  }
+
+  private _mediaSelectorValue(image?: string): Record<string, string> | undefined {
+    return image ? { media_content_id: image } : undefined;
+  }
+
+  private _onDefaultBackgroundSelected = (event: CustomEvent): void => {
+    this._backgroundUploadError = undefined;
+    this._updateConfig("background_image", this._mediaContentId(event.detail?.value));
+  };
+
+  private _addBackgroundCondition = (): void => {
+    const rules = [...(this._config.background_conditions ?? [])];
+    rules.push({ image: "", conditions: [] });
+    this._updateConfig("background_conditions", rules);
+  };
+
+  private _removeBackgroundCondition(index: number): void {
+    const rules = [...(this._config.background_conditions ?? [])];
+    rules.splice(index, 1);
+    this._updateConfig("background_conditions", rules);
+  }
+
+  private _updateBackgroundConditionImage(index: number, event: CustomEvent): void {
+    const rules = deepClone(this._config.background_conditions ?? []);
+    if (!rules[index]) return;
+    rules[index].image = this._mediaContentId(event.detail?.value) ?? "";
+    this._updateConfig("background_conditions", rules);
+  }
+
+  private _updateBackgroundConditions(index: number, event: CustomEvent): void {
+    const conditions = event.detail?.value;
+    if (!Array.isArray(conditions)) return;
+    const rules = deepClone(this._config.background_conditions ?? []);
+    if (!rules[index]) return;
+    rules[index].conditions = conditions;
+    this._updateConfig("background_conditions", rules);
+  }
+
   private _uploadBackgroundImage = async (event: Event): Promise<void> => {
     const input = event.currentTarget as HTMLInputElement;
     const file = input.files?.[0];
@@ -665,7 +768,9 @@ export class CustomRoomCardEditor extends LitElement {
     this._isUploadingBackground = true;
     try {
       const formData = new FormData();
-      formData.append("media_content_id", "media-source://media_source/local");
+      // Keep this card's assets contained in one media folder. Home Assistant
+      // creates the missing folders safely during the upload.
+      formData.append("media_content_id", "media-source://media_source/local/imported_images");
       formData.append("file", file, file.name);
       // Use Home Assistant's authenticated fetch helper. A regular browser
       // fetch has no bearer token and the media endpoint correctly rejects it.

@@ -13,7 +13,8 @@ A custom [Home Assistant](https://www.home-assistant.io/) Lovelace card that let
 ## Features
 
 - **Freely positioned buttons** – Place entity buttons anywhere using `left`/`top` percentages
-- **Image background** – Import an image from a computer or phone into Home Assistant media storage
+- **Image backgrounds** – Import into `media/local/imported_images` or select an existing image from Home Assistant's media browser
+- **Conditional backgrounds** – Apply the first matching image using Home Assistant automation conditions (entity, device, time, sun, template, etc.)
 - **Adaptive layout** – The card width is managed by Home Assistant and its canvas scales responsively
 - **Entity actions** – Tap to toggle, hold for more-info (fully configurable)
 - **Native icon picker** – Browse Home Assistant/MDI icons instead of entering an icon name
@@ -145,6 +146,7 @@ nested_cards:
 | `title`              | string   | —          | Room title shown in the top-left overlay            |
 | `show_title`         | boolean  | `true`     | Show / hide the title overlay                       |
 | `background_image`   | string   | —          | Image URL or Home Assistant media-source URI        |
+| `background_conditions` | list  | `[]`       | Ordered image rules using Home Assistant automation conditions |
 | `global_font_family` | string   | `system-ui`| Font family for all text                             |
 | `title_style`        | object   | —          | Title styling (font_size, text_color)               |
 | `button_label_style` | object   | —          | Button label styling (font_size, text_color)        |
@@ -346,7 +348,7 @@ custom-room-card/
 | Problem                        | Solution                                                   |
 | ------------------------------ | ---------------------------------------------------------- |
 | Card not showing               | Clear browser cache, check Resources config                |
-| Background image not loading   | Verify the file is in `config/www/` and path starts with `/local/` |
+| Background image not loading   | Select it again from the media browser, or check that it exists in `media/local/imported_images` |
 | Entity button not responding   | Check entity ID is correct, entity is not `unavailable`    |
 | Editor not appearing           | Make sure JS module is loaded (not JS), refresh browser    |
 

@@ -67,6 +67,9 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
   @state() private _config!: CustomRoomCardConfig;
   @state() private _nestedCards: Map<number, LovelaceCard> = new Map();
   @state() private _resolvedBackgroundImage?: string;
+  @state() private _activeBackgroundImage?: string;
+  private _backgroundEvaluationId = 0;
+  private _backgroundConditionTimer?: ReturnType<typeof setInterval>;
 
   /** Responsive scale factor: actualWidth / designWidth */
   @state() private _cardScale = 1;
@@ -82,6 +85,9 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
   connectedCallback(): void {
     super.connectedCallback();
     this._setupResizeObserver();
+    // Time, sun and template conditions can change while no entity in this
+    // card changes. Re-evaluate them periodically in addition to hass updates.
+    this._backgroundConditionTimer = setInterval(() => this._updateBackgroundImage(), 30_000);
   }
 
   disconnectedCallback(): void {
@@ -89,6 +95,8 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     this._resizeObserver?.disconnect();
     this._resizeObserver = undefined;
     this._observedContainer = undefined;
+    if (this._backgroundConditionTimer) clearInterval(this._backgroundConditionTimer);
+    this._backgroundConditionTimer = undefined;
   }
 
   public setConfig(config: CustomRoomCardConfig): void {
@@ -100,6 +108,8 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     // Recreate nested cards when config changes
     this._nestedCards = new Map();
     this._resolvedBackgroundImage = undefined;
+    this._activeBackgroundImage = undefined;
+    this._backgroundEvaluationId++;
   }
 
   public getCardSize(): number {
@@ -126,6 +136,10 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
     if (!oldHass) return true;
 
+    // Background automation conditions may depend on any Home Assistant
+    // entity, not only the entities explicitly displayed by this card.
+    if (this._config?.background_conditions?.length) return true;
+
     // Only re-render if any of our entities changed state
     const entities = this._config?.entities ?? [];
     return entities.some(
@@ -149,8 +163,8 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     if (changedProps.has("_config") && this._config?.nested_cards?.length) {
       this._createNestedCards();
     }
-    if ((changedProps.has("_config") || changedProps.has("hass")) && this._config?.background_image) {
-      this._resolveBackgroundImage();
+    if (changedProps.has("_config") || changedProps.has("hass")) {
+      this._updateBackgroundImage();
     }
     // Propagate hass to nested cards
     if (changedProps.has("hass")) {
@@ -205,7 +219,7 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
 
     // Apply custom card styles
     const cardCustomStyles: Record<string, string> = this._config.card_styles ?? {};
-    const backgroundImage = this._resolvedBackgroundImage ?? this._config.background_image;
+    const backgroundImage = this._resolvedBackgroundImage ?? this._activeBackgroundImage ?? this._config.background_image;
     const backgroundStyles: Record<string, string> = backgroundImage
       ? { "background-image": `url('${backgroundImage}')` }
       : {};
@@ -351,14 +365,47 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
     }
   }
 
-  private async _resolveBackgroundImage(): Promise<void> {
-    const image = this._config?.background_image;
+  /** Choose the first conditional background that passes, otherwise the default. */
+  private async _updateBackgroundImage(): Promise<void> {
+    if (!this._config || !this.hass) return;
+    const evaluationId = ++this._backgroundEvaluationId;
+    let image = this._config.background_image;
+
+    for (const rule of this._config.background_conditions ?? []) {
+      if (!rule.image || !rule.conditions?.length) continue;
+      try {
+        const result = await this.hass.callWS<{ result?: boolean }>({
+          // The same Home Assistant endpoint used to test automation conditions.
+          type: "test_condition",
+          condition: rule.conditions,
+        });
+        if (evaluationId !== this._backgroundEvaluationId) return;
+        if (result.result) {
+          image = rule.image;
+          break;
+        }
+      } catch (error) {
+        // An invalid/incomplete rule must not prevent the fallback background
+        // from being displayed while it is edited.
+        console.warn("[custom-room-card] Could not evaluate background condition", error);
+      }
+    }
+
+    if (evaluationId !== this._backgroundEvaluationId) return;
+    this._activeBackgroundImage = image;
+    await this._resolveBackgroundImage(image, evaluationId);
+  }
+
+  private async _resolveBackgroundImage(
+    image: string | undefined,
+    evaluationId = this._backgroundEvaluationId
+  ): Promise<void> {
     if (!image) {
-      this._resolvedBackgroundImage = undefined;
+      if (evaluationId === this._backgroundEvaluationId) this._resolvedBackgroundImage = undefined;
       return;
     }
     if (!image.startsWith("media-source://")) {
-      this._resolvedBackgroundImage = image;
+      if (evaluationId === this._backgroundEvaluationId) this._resolvedBackgroundImage = image;
       return;
     }
 
@@ -367,7 +414,7 @@ export class CustomRoomCard extends LitElement implements LovelaceCard {
         type: "media_source/resolve_media",
         media_content_id: image,
       });
-      if (this._config.background_image === image && resolved.url) {
+      if (evaluationId === this._backgroundEvaluationId && resolved.url) {
         this._resolvedBackgroundImage = resolved.url;
       }
     } catch (error) {

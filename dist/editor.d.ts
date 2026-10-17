@@ -33,6 +33,8 @@ export declare class CustomRoomCardEditor extends LitElement {
     disconnectedCallback(): void;
     protected render(): TemplateResult;
     private _renderGeneralSection;
+    private _renderBackgroundConditions;
+    private _renderBackgroundCondition;
     private _renderTextStyleSection;
     private _renderEntitiesSection;
     private _renderEntityRow;
@@ -46,6 +48,14 @@ export declare class CustomRoomCardEditor extends LitElement {
     private _colorPickerValue;
     private _onFontSelected;
     private _clearBackgroundImage;
+    /** Convert the value emitted by HA's media selector into our compact URI. */
+    private _mediaContentId;
+    private _mediaSelectorValue;
+    private _onDefaultBackgroundSelected;
+    private _addBackgroundCondition;
+    private _removeBackgroundCondition;
+    private _updateBackgroundConditionImage;
+    private _updateBackgroundConditions;
     private _uploadBackgroundImage;
     private _addNestedCard;
     private _removeNestedCard;

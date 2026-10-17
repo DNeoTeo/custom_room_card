@@ -123,6 +123,14 @@ export interface NestedCardConfig {
   styles?: Record<string, string>;
 }
 
+/** A background image activated when all Home Assistant conditions are true. */
+export interface BackgroundConditionConfig {
+  /** Image media-source URI selected from Home Assistant's media browser. */
+  image: string;
+  /** Standard Home Assistant automation conditions. The first matching rule wins. */
+  conditions: Record<string, unknown>[];
+}
+
 export const DEFAULT_NESTED_CARD: Partial<NestedCardConfig> = {
   left: 50,
   top: 50,
@@ -137,6 +145,8 @@ export interface CustomRoomCardConfig extends LovelaceCardConfig {
   title?: string;
   /** Image URL or Home Assistant media-source URI used as the card background */
   background_image?: string;
+  /** Conditional background images, evaluated in their displayed order. */
+  background_conditions?: BackgroundConditionConfig[];
   /** Global font family for all text in the card */
   global_font_family?: string;
   /** Title text styling */

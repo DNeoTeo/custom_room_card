@@ -16,6 +16,9 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     private _config;
     private _nestedCards;
     private _resolvedBackgroundImage?;
+    private _activeBackgroundImage?;
+    private _backgroundEvaluationId;
+    private _backgroundConditionTimer?;
     /** Responsive scale factor: actualWidth / designWidth */
     private _cardScale;
     private _resizeObserver?;
@@ -36,6 +39,8 @@ export declare class CustomRoomCard extends LitElement implements LovelaceCard {
     private _renderEntityButton;
     private _renderNestedCard;
     private _createNestedCards;
+    /** Choose the first conditional background that passes, otherwise the default. */
+    private _updateBackgroundImage;
     private _resolveBackgroundImage;
     private _createCardElement;
     private _onPointerDown;

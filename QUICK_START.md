@@ -4,10 +4,11 @@
 
 1. Add **Custom Room Card** to a dashboard and open its visual editor.
 2. Select a global font in **General**.
-3. Use **Import image** in **General** to upload a room background from your computer or phone. The image is stored in Home Assistant's media library.
-4. Add entity buttons, then use Home Assistant's native icon picker to choose an icon.
-5. Use the color selectors and font-size fields in **Text Styling**.
-6. Add nested cards with **Nested Cards**. The native Home Assistant picker lets you select entity, gauge, tile, graph, or custom cards; their normal editor is then shown directly in the card editor.
+3. In **General**, import an image (stored in `media/local/imported_images`) or select an existing image via Home Assistant's media browser.
+4. Optionally add ordered background rules using the native automation-condition editor; the first matching rule wins over the default image.
+5. Add entity buttons, then use Home Assistant's native icon picker to choose an icon.
+6. Use the color selectors and font-size fields in **Text Styling**.
+7. Add nested cards with **Nested Cards**. The native Home Assistant picker lets you select entity, gauge, tile, graph, or custom cards; their normal editor is then shown directly in the card editor.
 
 Home Assistant controls the card dimensions. The room canvas adapts automatically so positions remain responsive.
 
